@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PronoAI — Pronostici Sportivi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --bg2: #0f1218;
+    --bg3: #161b24;
+    --bg4: #1e2535;
+    --accent: #00e5a0;
+    --accent2: #0084ff;
+    --accent3: #ff4d4d;
+    --amber: #ffb81c;
+    --text: #f0f4ff;
+    --text2: #8892a4;
+    --text3: #4e5a6b;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --font-head: 'Barlow Condensed', sans-serif;
+    --font-body: 'Barlow', sans-serif;
+    --card-radius: 12px;
+    --glow: 0 0 30px rgba(0,229,160,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG GRID */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,12,16,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border2);
+    padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-head);
+    font-size: 22px; font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: #000;
+  }
+  .logo span { color: var(--accent); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,77,77,0.15);
+    border: 1px solid rgba(255,77,77,0.3);
+    color: var(--accent3);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .live-dot {
+    width: 6px; height: 6px;
+    background: var(--accent3);
+    border-radius: 50%;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+
+  /* NAV TABS */
+  .nav-tabs {
+    display: flex; gap: 0;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    font-family: var(--font-head);
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 14px 20px;
+    background: none; border: none;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* MAIN */
+  main { position: relative; z-index: 1; padding: 24px; max-width: 1100px; margin: 0 auto; }
+
+  /* HERO SEARCH */
+  .hero-search {
+    display: flex; gap: 10px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.5s ease both;
+  }
+  .search-wrap {
+    flex: 1; position: relative;
+  }
+  .search-input {
+    width: 100%; background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--card-radius);
+    color: var(--text); font-family: var(--font-body);
+    font-size: 14px; padding: 12px 16px 12px 44px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text3); }
+  .search-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); font-size: 16px;
+  }
+  .search-btn {
+    background: var(--accent); color: #000;
+    border: none; border-radius: var(--card-radius);
+    font-family: var(--font-head); font-weight: 700;
+    font-size: 13px; letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 12px 20px; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .search-btn:hover { background: #00c78a; transform: translateY(-1px); }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: var(--font-head);
+    font-size: 18px; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--text);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::before {
+    content: '';
+    display: block;
+    width: 4px; height: 18px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .section-count {
+    font-size: 11px; background: var(--bg4);
+    color: var(--text2); padding: 2px 8px; border-radius: 10px;
+    font-family: var(--font-body); font-weight: 500;
+  }
+  .see-all {
+    font-size: 12px; color: var(--accent2); cursor: pointer;
+    font-weight: 500; letter-spacing: 0.03em;
+    text-decoration: none; background: none; border: none;
+  }
+
+  /* MATCH CARDS GRID */
+  .matches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  /* MATCH CARD */
+  .match-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    animation: fadeUp 0.4s ease both;
+  }
+  .match-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--border2);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg4);
+    border-bottom: 1px solid var(--border);
+  }
+  .comp-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--text2);
+  }
+  .comp-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .time-badge {
+    font-size: 11px; color: var(--text3);
+    font-weight: 500;
+  }
+  .live-indicator {
+    font-size: 10px; color: var(--accent3);
+    font-weight: 700; letter-spacing: 0.06em;
+    animation: pulse 1.2s ease infinite;
+  }
+
+  .card-body { padding: 14px; }
+  .teams-row {
+    display: flex; align-items: center;
+    gap: 8px; margin-bottom: 12px;
+  }
+  .team-block { flex: 1; }
+  .team-name {
+    font-family: var(--font-head);
+    font-size: 16px; font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    margin-bottom: 2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .team-rank { font-size: 10px; color: var(--text3); }
+  .teams-row.away { text-align: right; }
+  .score-box {
+    min-width: 54px; text-align: center;
+    background: var(--bg4);
+    border-radius: 8px;
+    padding: 6px 8px;
+    border: 1px solid var(--border2);
+    flex-shrink: 0;
+  }
+  .score-val {
+    font-family: var(--font-head);
+    font-size: 20px; font-weight: 800;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+  .score-label { font-size: 9px; color: var(--text3); margin-top: 2px; }
+
+  /* PROB BAR */
+  .prob-section { margin-bottom: 12px; }
+  .prob-bar-wrap {
+    height: 5px; border-radius: 3px;
+    background: var(--bg4);
+    display: flex; overflow: hidden; gap: 2px;
+    margin: 6px 0;
+  }
+  .pb-1 { background: var(--accent2); border-radius: 3px 0 0 3px; }
+  .pb-x { background: var(--text3); }
+  .pb-2 { background: var(--accent); border-radius: 0 3px 3px 0; }
+  .prob-labels {
+    display: flex; justify-content: space-between;
+    font-size: 11px;
+  }
+  .pl-item { text-align: center; }
+  .pl-pct { font-weight: 600; color: var(--text); }
+  .pl-name { color: var(--text3); font-size: 10px; }
+
+  /* TAGS */
+  .tags-row {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .tag {
+    font-size: 10px; font-weight: 600;
+    padding: 3px 9px; border-radius: 20px;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .tag-green { background: rgba(0,229,160,0.12); color: var(--accent); border: 1px solid rgba(0,229,160,0.25); }
+  .tag-blue { background: rgba(0,132,255,0.12); color: var(--accent2); border: 1px solid rgba(0,132,255,0.25); }
+  .tag-amber { background: rgba(255,184,28,0.12); color: var(--amber); border: 1px solid rgba(255,184,28,0.25); }
+  .tag-red { background: rgba(255,77,77,0.12); color: var(--accent3); border: 1px solid rgba(255,77,77,0.25); }
+  .tag-gray { background: rgba(255,255,255,0.06); color: var(--text2); border: 1px solid var(--border2); }
+
+  /* PRONOSTICO RESULT */
+  .prono-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 10px; border-top: 1px solid var(--border);
+  }
+  .prono-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+  .prono-result {
+    font-family: var(--font-head);
+    font-size: 14px; font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+  .quota-pill {
+    background: rgba(255,184,28,0.12);
+    border: 1px solid rgba(255,184,28,0.3);
+    color: var(--amber);
+    font-size: 11px; font-weight: 700;
+    padding: 3px 9px; border-radius: 20px;
+  }
+
+  /* CONFIDENCE METER */
+  .confidence-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 6px;
+  }
+  .conf-label { font-size: 10px; color: var(--text3); flex-shrink: 0; }
+  .conf-bar {
+    flex: 1; height: 3px; background: var(--bg4); border-radius: 2px; overflow: hidden;
+  }
+  .conf-fill { height: 100%; border-radius: 2px; }
+  .conf-val { font-size: 10px; color: var(--text2); font-weight: 600; }
+
+  /* SOURCES PANEL */
+  .sources-panel {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 16px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .sources-title {
+    font-family: var(--font-head);
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text3); margin-bottom: 12px;
+  }
+  .sources-grid {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .source-chip {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 11px; font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .source-chip:hover, .source-chip.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,229,160,0.06);
+  }
+  .source-icon { font-size: 14px; }
+  .source-cat {
+    font-size: 9px; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.3s ease both;
+  }
+  .stat-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 14px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border2); }
+  .stat-val {
+    font-family: var(--font-head);
+    font-size: 28px; font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+  .stat-name { font-size: 11px; color: var(--text3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* AI CHAT PANEL */
+  .ai-panel {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    margin-bottom: 28px;
+    animation: fadeUp 0.7s ease both;
+    display: none;
+  }
+  .ai-panel.visible { display: block; }
+  .ai-panel-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(0,229,160,0.08), rgba(0,132,255,0.06));
+    border-bottom: 1px solid var(--border);
+  }
+  .ai-avatar {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .ai-name { font-weight: 600; font-size: 13px; }
+  .ai-desc { font-size: 11px; color: var(--text3); }
+  .ai-messages { padding: 16px; max-height: 280px; overflow-y: auto; }
+  .ai-msg {
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px; line-height: 1.6;
+    animation: fadeUp 0.3s ease both;
+  }
+  .ai-msg.bot { background: var(--bg4); color: var(--text); border-left: 2px solid var(--accent); }
+  .ai-msg.user { background: rgba(0,132,255,0.1); color: var(--text2); text-align: right; border-right: 2px solid var(--accent2); }
+  .ai-input-row {
+    display: flex; gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .ai-input {
+    flex: 1; background: var(--bg4);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text); font-family: var(--font-body);
+    font-size: 13px; padding: 9px 12px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .ai-input:focus { border-color: var(--accent); }
+  .ai-send {
+    background: var(--accent); color: #000;
+    border: none; border-radius: 8px;
+    font-weight: 700; font-size: 13px;
+    padding: 0 16px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .ai-send:hover { background: #00c78a; }
+  .ai-toggle-btn {
+    background: rgba(0,229,160,0.1);
+    border: 1px solid rgba(0,229,160,0.3);
+    color: var(--accent);
+    border-radius: 8px;
+    font-size: 12px; font-weight: 600;
+    padding: 7px 14px; cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+  }
+  .ai-toggle-btn:hover { background: rgba(0,229,160,0.18); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75); z-index: 1000;
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    max-width: 520px; width: 92%;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: scaleIn 0.25s ease;
+  }
+  @keyframes scaleIn { from{transform:scale(0.93);opacity:0} to{transform:scale(1);opacity:1} }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg2);
+    border-radius: 16px 16px 0 0;
+  }
+  .modal-title { font-family: var(--font-head); font-size: 17px; font-weight: 700; letter-spacing: 0.04em; }
+  .modal-close {
+    background: var(--bg4); border: none;
+    width: 28px; height: 28px; border-radius: 50%;
+    color: var(--text2); font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .modal-close:hover { background: var(--accent3); color: #fff; }
+  .modal-body { padding: 20px; }
+  .modal-section-title {
+    font-size: 11px; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    margin-bottom: 10px; margin-top: 16px;
+  }
+  .modal-section-title:first-child { margin-top: 0; }
+  .source-analysis-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px;
+    background: var(--bg3);
+    border-radius: 8px; margin-bottom: 6px;
+    border: 1px solid var(--border);
+  }
+  .sa-name { font-size: 13px; font-weight: 500; }
+  .sa-result {
+    font-family: var(--font-head);
+    font-size: 13px; font-weight: 700;
+  }
+  .sa-conf { font-size: 11px; color: var(--text3); }
+  .sa-agree { color: var(--accent); }
+  .sa-partial { color: var(--amber); }
+  .sa-diff { color: var(--accent3); }
+
+  /* FILTER BAR */
+  .filter-bar {
+    display: flex; gap: 8px; margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    font-family: var(--font-head); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 7px 14px; border-radius: 20px;
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text2); cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: var(--border2); color: var(--text); }
+  .filter-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  /* LOADING */
+  .loading-state {
+    text-align: center; padding: 48px;
+    color: var(--text3); font-size: 14px;
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* TABS CONTENT */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* TICKER */
+  .ticker-wrap {
+    background: rgba(0,229,160,0.06);
+    border-top: 1px solid rgba(0,229,160,0.15);
+    border-bottom: 1px solid rgba(0,229,160,0.15);
+    padding: 8px 0; overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .ticker {
+    display: flex; gap: 40px;
+    white-space: nowrap;
+    animation: scrollTicker 30s linear infinite;
+  }
+  @keyframes scrollTicker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .ticker-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--text2); flex-shrink: 0;
+  }
+  .ticker-item strong { color: var(--text); font-weight: 600; }
+  .ticker-dot { width: 4px; height: 4px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+
+  /* DISCLAIMER */
+  .disclaimer {
+    background: rgba(255,184,28,0.06);
+    border: 1px solid rgba(255,184,28,0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 11px; color: var(--amber);
+    line-height: 1.6; margin-bottom: 28px;
+  }
+  .disclaimer strong { font-weight: 600; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(12px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+
+  /* LEAGUE BADGE */
+  .league-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .lb-uel { background: rgba(255,102,0,0.15); color: #ff7733; border: 1px solid rgba(255,102,0,0.3); }
+  .lb-ucl { background: rgba(0,132,255,0.12); color: var(--accent2); border: 1px solid rgba(0,132,255,0.25); }
+  .lb-sa { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.25); }
+  .lb-pl { background: rgba(140,40,250,0.12); color: #b068ff; border: 1px solid rgba(140,40,250,0.25); }
+  .lb-bund { background: rgba(255,184,28,0.12); color: var(--amber); border: 1px solid rgba(255,184,28,0.25); }
+  .lb-liga { background: rgba(255,40,60,0.12); color: #ff6070; border: 1px solid rgba(255,40,60,0.25); }
+
+  /* RESPONSIVE */
+  @media(max-width:600px) {
+    main { padding: 16px; }
+    .matches-grid { grid-template-columns: 1fr; }
+    .topbar { padding: 0 16px; }
+    .hero-search { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">⚽</div>
+    Prono<span>AI</span>
+  </div>
+  <div class="topbar-right">
+    <div class="live-badge"><div class="live-dot"></div>Live</div>
+    <span style="font-size:11px;color:var(--text3);">12 Mar 2026</span>
+  </div>
+</div>
+
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('oggi')">Oggi</button>
+  <button class="tab-btn" onclick="switchTab('domani')">Domani</button>
+  <button class="tab-btn" onclick="switchTab('classifica')">Classifiche</button>
+  <button class="tab-btn" onclick="switchTab('analisi')">Analisi AI</button>
+  <button class="tab-btn" onclick="switchTab('fonti')">Fonti & Quote</button>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker" id="tickerInner"></div>
+</div>
+
+<main>
+
+<!-- TAB OGGI -->
+<div class="tab-content active" id="tab-oggi">
+
+  <!-- STATS ROW -->
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-val" id="countPartite">8</div><div class="stat-name">Partite oggi</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent2)">18</div><div class="stat-name">Fonti analizzate</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--amber)">73%</div><div class="stat-name">Accuratezza media</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent3)">3</div><div class="stat-name">Alta fiducia</div></div>
+  </div>
+
+  <!-- HERO SEARCH -->
+  <div class="hero-search">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" placeholder="Cerca squadra, competizione, pronostico..." id="searchInput" oninput="filterCards()">
+    </div>
+    <button class="search-btn" onclick="toggleAI()">🤖 Chiedi all'AI</button>
+  </div>
+
+  <!-- AI PANEL -->
+  <div class="ai-panel" id="aiPanel">
+    <div class="ai-panel-header">
+      <div class="ai-avatar">🤖</div>
+      <div>
+        <div class="ai-name">PronoAI Assistant</div>
+        <div class="ai-desc">Analisi in tempo reale da 18 fonti sportive</div>
+      </div>
+    </div>
+    <div class="ai-messages" id="aiMessages">
+      <div class="ai-msg bot">👋 Ciao! Sono il tuo assistente per i pronostici. Puoi chiedermi analisi su qualsiasi partita di oggi, comparazione quote tra bookmaker, o consigli sulle migliori scommesse di giornata.</div>
+    </div>
+    <div class="ai-input-row">
+      <input class="ai-input" id="aiInput" placeholder="Es: Analizza Bologna-Roma, Qual è la miglior quota per il derby..." onkeydown="if(event.key==='Enter')sendAIMsg()">
+      <button class="ai-send" onclick="sendAIMsg()">→</button>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterByComp('all',this)">Tutte</button>
+    <button class="filter-btn" onclick="filterByComp('UEL',this)">Europa League</button>
+    <button class="filter-btn" onclick="filterByComp('UCL',this)">Champions</button>
+    <button class="filter-btn" onclick="filterByComp('SA',this)">Serie A</button>
+    <button class="filter-btn" onclick="filterByComp('PL',this)">Premier</button>
+    <button class="filter-btn" onclick="filterByComp('BUND',this)">Bundesliga</button>
+    <button class="filter-btn" onclick="filterByComp('LIGA',this)">La Liga</button>
+  </div>
+
+  <!-- SECTION -->
+  <div class="section-header">
+    <div class="section-title">Ottavi Europa League <span class="section-count">8 partite</span></div>
+    <button class="see-all" onclick="sortByConf()">Ordina per fiducia ↕</button>
+  </div>
+
+  <!-- MATCHES GRID -->
+  <div class="matches-grid" id="matchesGrid"></div>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    <strong>⚠️ Avviso:</strong> I pronostici sono elaborazioni statistiche da fonti pubbliche (SofaScore, Forebet, Sky Sport, Rai Sport, Tuttosport, DAZN, Gazzetta dello Sport, UEFA, Transfermarkt, Bet365, Betfair, SNAI, Sisal, Eurobet, GoldBet, Planetwin365, Diretta.it, TuttoMercatoWeb). Non costituiscono certezza. Il gioco d'azzardo è vietato ai minori di 18 anni e può causare dipendenza. Gioca responsabilmente.
+  </div>
+
+</div>
+
+<!-- TAB DOMANI -->
+<div class="tab-content" id="tab-domani">
+  <div class="section-header" style="margin-top:8px">
+    <div class="section-title">Partite di domani</div>
+  </div>
+  <div class="matches-grid" id="domaniGrid"></div>
+</div>
+
+<!-- TAB CLASSIFICA -->
+<div class="tab-content" id="tab-classifica">
+  <div class="section-header" style="margin-top:8px">
+    <div class="section-title">Classifiche live</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px" id="classGrid"></div>
+</div>
+
+<!-- TAB ANALISI -->
+<div class="tab-content" id="tab-analisi">
+  <div class="section-header" style="margin-top:8px">
+    <div class="section-title">Analisi approfondite AI</div>
+  </div>
+  <div id="analisiContent"></div>
+</div>
+
+<!-- TAB FONTI -->
+<div class="tab-content" id="tab-fonti">
+  <div class="section-header" style="margin-top:8px">
+    <div class="section-title">Fonti & Bookmaker</div>
+  </div>
+  <div id="fontiContent"></div>
+</div>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Dettaglio partita</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const MATCHES = [
+  {
+    id:1, comp:'UEL', compLabel:'Europa League', slot:'18:45',
+    home:'Bologna', away:'Roma', flag:'🇮🇹🇮🇹',
+    prob1:30, probX:32, prob2:38,
+    prono:'X — 1-1', quota:'2.10',
+    conf:68, tags:['Derby 🇮🇹','Under 2.5','Equilibrio'],
+    tagTypes:['tag-amber','tag-blue','tag-gray'],
+    info:'Primo derby europeo tra le due squadre. Bologna in forma con 5 vittorie consecutive. Roma più esperta in Europa.',
+    sources:[
+      {n:'SofaScore',r:'X',c:'Alta',a:'agree'},{n:'Forebet',r:'X',c:'Media',a:'agree'},
+      {n:'Sky Sport',r:'1-1',c:'Alta',a:'agree'},{n:'Gazzetta',r:'2-1 Roma',c:'Media',a:'diff'},
+      {n:'Tuttosport',r:'1-1',c:'Media',a:'agree'},{n:'Rai Sport',r:'X',c:'Bassa',a:'partial'},
+      {n:'SNAI',r:'X q2.10',c:'—',a:'agree'},{n:'Sisal',r:'X q2.05',c:'—',a:'agree'},
+      {n:'Bet365',r:'X q2.10',c:'—',a:'agree'},{n:'Betfair',r:'X 2.12',c:'—',a:'agree'},
+    ]
+  },
+  {
+    id:2, comp:'UEL', compLabel:'Europa League', slot:'18:45',
+    home:'Lille', away:'Aston Villa', flag:'🇫🇷🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+    prob1:33, probX:28, prob2:39,
+    prono:'2 — 1-2', quota:'2.40',
+    conf:72, tags:['Emery fav.','GG','Coppa storica'],
+    tagTypes:['tag-green','tag-green','tag-gray'],
+    info:'Emery ha vinto l\'EL per 4 volte. Aston Villa favorito dalle quote. Lille solido in casa ma Villa in grande forma.',
+    sources:[
+      {n:'SofaScore',r:'2',c:'Alta',a:'agree'},{n:'Forebet',r:'2',c:'Alta',a:'agree'},
+      {n:'Sky Sport',r:'1-2',c:'Alta',a:'agree'},{n:'DAZN',r:'2',c:'Media',a:'agree'},
+      {n:'Gazzetta',r:'1-1',c:'Bassa',a:'diff'},{n:'UEFA.com',r:'2 fav',c:'Alta',a:'agree'},
+      {n:'Bet365',r:'2 q2.40',c:'—',a:'agree'},{n:'Betfair',r:'2 2.42',c:'—',a:'agree'},
+      {n:'GoldBet',r:'2 q2.38',c:'—',a:'agree'},{n:'Sisal',r:'GG q1.75',c:'—',a:'partial'},
+    ]
+  },
+  {
+    id:3, comp:'UEL', compLabel:'Europa League', slot:'18:45',
+    home:'Stoccarda', away:'Porto', flag:'🇩🇪🇵🇹',
+    prob1:43, probX:27, prob2:30,
+    prono:'1 — 2-1', quota:'2.10',
+    conf:65, tags:['GG','Under 3.5','In equilibrio'],
+    tagTypes:['tag-green','tag-blue','tag-gray'],
+    info:'Stoccarda favorito in casa. Porto forte nelle trasferte europee. Attesa partita combattuta con gol su entrambi i fronti.',
+    sources:[
+      {n:'Forebet',r:'1',c:'Media',a:'agree'},{n:'SofaScore',r:'GG',c:'Media',a:'partial'},
+      {n:'Sky Sport',r:'1-1',c:'Bassa',a:'diff'},{n:'Transfermarkt',r:'Valore uguale',c:'—',a:'partial'},
+      {n:'SNAI',r:'1 q2.10',c:'—',a:'agree'},{n:'Eurobet',r:'GG q1.57',c:'—',a:'partial'},
+      {n:'Planetwin',r:'1 q2.12',c:'—',a:'agree'},{n:'Betfair',r:'1 2.14',c:'—',a:'agree'},
+    ]
+  },
+  {
+    id:4, comp:'UEL', compLabel:'Europa League', slot:'18:45',
+    home:'Panathinaikos', away:'Betis Siviglia', flag:'🇬🇷🇪🇸',
+    prob1:30, probX:27, prob2:43,
+    prono:'2 — 0-1', quota:'2.05',
+    conf:74, tags:['Betis fav.','Under 2.5','1 su 18 vs Spagna'],
+    tagTypes:['tag-green','tag-blue','tag-red'],
+    info:'Panathinaikos ha solo 1 vittoria nelle ultime 18 sfide contro squadre spagnole. Betis partita favorita.',
+    sources:[
+      {n:'SofaScore',r:'2',c:'Alta',a:'agree'},{n:'Forebet',r:'2',c:'Alta',a:'agree'},
+      {n:'Sky Sport',r:'0-1',c:'Alta',a:'agree'},{n:'UEFA.com',r:'Betis fav',c:'Alta',a:'agree'},
+      {n:'Sisal',r:'2 q2.05',c:'—',a:'agree'},{n:'SNAI',r:'2 q2.00',c:'—',a:'agree'},
+      {n:'Bet365',r:'2 q2.05',c:'—',a:'agree'},{n:'Betfair',r:'2 2.06',c:'—',a:'agree'},
+    ]
+  },
+  {
+    id:5, comp:'UEL', compLabel:'Europa League', slot:'21:00',
+    home:'Nottingham Forest', away:'Midtjylland', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿🇩🇰',
+    prob1:52, probX:23, prob2:25,
+    prono:'1 — 2-1', quota:'1.75',
+    conf:79, tags:['Forest favorito','Over 2.5','Netto vantaggio'],
+    tagTypes:['tag-green','tag-amber','tag-green'],
+    info:'Forest nettamente favorito. Midtjylland ha sovraperformato gli xG nella fase a gironi: segnale di regressione attesa.',
+    sources:[
+      {n:'SofaScore',r:'1',c:'Alta',a:'agree'},{n:'Forebet',r:'1',c:'Alta',a:'agree'},
+      {n:'Sky Sport',r:'2-1',c:'Alta',a:'agree'},{n:'DAZN',r:'1',c:'Alta',a:'agree'},
+      {n:'Tuttosport',r:'1',c:'Media',a:'agree'},{n:'Bet365',r:'1 q1.75',c:'—',a:'agree'},
+      {n:'Betfair',r:'1 1.76',c:'—',a:'agree'},{n:'GoldBet',r:'1 q1.72',c:'—',a:'agree'},
+    ]
+  },
+  {
+    id:6, comp:'UEL', compLabel:'Europa League', slot:'21:00',
+    home:'Celta Vigo', away:'Lione', flag:'🇪🇸🇫🇷',
+    prob1:38, probX:30, prob2:32,
+    prono:'1X — 1-0', quota:'1.45',
+    conf:63, tags:['Equilibrio','Zaragoza chiave','GG possibile'],
+    tagTypes:['tag-gray','tag-amber','tag-blue'],
+    info:'Lione domina il possesso (61.2% nella fase a gironi). Celta dipende molto da Zaragoza. Match equilibrato.',
+    sources:[
+      {n:'SofaScore',r:'1X',c:'Media',a:'agree'},{n:'Forebet',r:'1',c:'Bassa',a:'partial'},
+      {n:'Sky Sport',r:'1-0',c:'Media',a:'agree'},{n:'Rai Sport',r:'X',c:'Bassa',a:'diff'},
+      {n:'Eurobet',r:'1X q1.45',c:'—',a:'agree'},{n:'Sisal',r:'GG q1.72',c:'—',a:'partial'},
+      {n:'Planetwin',r:'1 q1.95',c:'—',a:'partial'},{n:'DAZN',r:'1',c:'Media',a:'agree'},
+    ]
+  },
+  {
+    id:7, comp:'UEL', compLabel:'Europa League', slot:'21:00',
+    home:'Genk', away:'Friburgo', flag:'🇧🇪🇩🇪',
+    prob1:34, probX:29, prob2:37,
+    prono:'2 — 0-1', quota:'2.10',
+    conf:61, tags:['Friburgo fav.','GG','17 gol Genk EL'],
+    tagTypes:['tag-green','tag-green','tag-blue'],
+    info:'Genk ha segnato 17 gol in 10 partite di EL. Friburgo difensivamente solido, leggermente favorito.',
+    sources:[
+      {n:'Forebet',r:'2',c:'Media',a:'agree'},{n:'SofaScore',r:'2',c:'Bassa',a:'agree'},
+      {n:'Sky Sport',r:'0-1',c:'Media',a:'agree'},{n:'Transfermarkt',r:'Frib +valore',c:'—',a:'agree'},
+      {n:'SNAI',r:'2 q2.10',c:'—',a:'agree'},{n:'Bet365',r:'2 q2.08',c:'—',a:'agree'},
+      {n:'Betfair',r:'2 2.12',c:'—',a:'agree'},{n:'GoldBet',r:'2 q2.05',c:'—',a:'agree'},
+    ]
+  },
+  {
+    id:8, comp:'UEL', compLabel:'Europa League', slot:'21:00',
+    home:'Ferencváros', away:'Sporting Braga', flag:'🇭🇺🇵🇹',
+    prob1:32, probX:26, prob2:42,
+    prono:'2 — 0-1', quota:'2.15',
+    conf:71, tags:['Braga fav.','Under 2.5','Difesa Braga 🔒'],
+    tagTypes:['tag-green','tag-blue','tag-green'],
+    info:'Braga ha subito solo 2 gol in 7 trasferte europee stagionali. Porto inviolata in 5 occasioni.',
+    sources:[
+      {n:'SofaScore',r:'2',c:'Alta',a:'agree'},{n:'Forebet',r:'2',c:'Alta',a:'agree'},
+      {n:'Sky Sport',r:'0-1',c:'Alta',a:'agree'},{n:'UEFA.com',r:'Braga fav',c:'Alta',a:'agree'},
+      {n:'Sisal',r:'2 q2.15',c:'—',a:'agree'},{n:'SNAI',r:'2 q2.12',c:'—',a:'agree'},
+      {n:'Betfair',r:'2 2.18',c:'—',a:'agree'},{n:'Eurobet',r:'Under q1.90',c:'—',a:'partial'},
+    ]
+  }
+];
+
+const DOMANI_MATCHES = [
+  {id:10,comp:'SA',compLabel:'Serie A',slot:'20:45',home:'Inter',away:'Milan',flag:'🇮🇹',prob1:45,probX:28,prob2:27,prono:'1 — 2-0',quota:'2.00',conf:70,tags:['Derby Milano','Quota 2.00'],tagTypes:['tag-amber','tag-blue'],info:'Derby di Milano. Inter in testa alla classifica, Milan in recupero.',sources:[]},
+  {id:11,comp:'PL',compLabel:'Premier League',slot:'16:30',home:'Liverpool',away:'Tottenham',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',prob1:72,probX:16,prob2:12,prono:'1 — 2-0',quota:'1.55',conf:82,tags:['Liverpool dominante'],tagTypes:['tag-green'],info:'Liverpool grande favorito ad Anfield.',sources:[]},
+  {id:12,comp:'BUND',compLabel:'Bundesliga',slot:'18:30',home:'Bayern Munich',away:'Dortmund',away2:'Dortmund',flag:'🇩🇪',prob1:55,probX:25,prob2:20,prono:'1 — 3-1',quota:'1.70',conf:75,tags:['Bayern fav.','Over 2.5'],tagTypes:['tag-green','tag-amber'],info:'Klassiker di Bundesliga.',sources:[]},
+];
+
+const FONTI = [
+  {icon:'📊',name:'SofaScore',cat:'Statistiche',url:'#',desc:'Statistiche avanzate, xG, heat map, pagelle in tempo reale'},
+  {icon:'⚡',name:'Forebet',cat:'Pronostici AI',url:'#',desc:'Algoritmi matematici, oltre 850 campionati analizzati'},
+  {icon:'📺',name:'Sky Sport',cat:'Media/TV',url:'#',desc:'Notizie, analisi, probabili formazioni, esperti TV'},
+  {icon:'📺',name:'Rai Sport',cat:'Media/TV',url:'#',desc:'Copertura nazionale, analisi pre/post partita'},
+  {icon:'📰',name:'Gazzetta dello Sport',cat:'Giornale',url:'#',desc:'La rosea, notizie e analisi tattiche quotidiane'},
+  {icon:'📰',name:'Tuttosport',cat:'Giornale',url:'#',desc:'Calcio italiano e internazionale, mercato'},
+  {icon:'🎬',name:'DAZN',cat:'Streaming',url:'#',desc:'Dirette, highlights, analisi esperto'},
+  {icon:'🌐',name:'UEFA.com',cat:'Ufficiale',url:'#',desc:'Dati ufficiali UEFA, statistiche verificate'},
+  {icon:'💰',name:'Bet365',cat:'Bookmaker ADM',url:'#',desc:'Leader scommesse live e pre-partita'},
+  {icon:'💰',name:'Betfair',cat:'Exchange ADM',url:'#',desc:'Betting exchange, quote di mercato reale'},
+  {icon:'💰',name:'SNAI',cat:'Bookmaker ADM',url:'#',desc:'Leader calcio italiano, app completa'},
+  {icon:'💰',name:'Sisal',cat:'Bookmaker ADM',url:'#',desc:'Streaming di alta qualità, ottima UX'},
+  {icon:'💰',name:'Eurobet',cat:'Bookmaker ADM',url:'#',desc:'Promozioni, ampio palinsesto'},
+  {icon:'💰',name:'GoldBet',cat:'Bookmaker ADM',url:'#',desc:'Ampia scelta sport e mercati'},
+  {icon:'💰',name:'Planetwin365',cat:'Bookmaker ADM',url:'#',desc:'Eccellente payout e mercati'},
+  {icon:'📈',name:'Diretta.it/Flashscore',cat:'Risultati live',url:'#',desc:'Risultati in tempo reale imbattibili'},
+  {icon:'📈',name:'Transfermarkt',cat:'Statistiche',url:'#',desc:'Valori di mercato, statistiche giocatori'},
+  {icon:'📰',name:'TuttoMercatoWeb',cat:'Notizie',url:'#',desc:'Calciomercato, notizie in tempo reale'},
+];
+
+const AI_RESPONSES = {
+  'bologna': '🔍 **Bologna–Roma (18:45)**: Il Bologna arriva da 5 vittorie consecutive, solo 1 gol subito. Gli xG della fase a gironi erano 2.18/partita. La Roma, però, ha più esperienza nelle fasi ad eliminazione diretta. **Pronostico: X (pareggio) q2.10** — 8 fonti su 10 concordano. Consiglio: punta su Under 2.5 a q1.75.',
+  'roma': '🔍 **Roma** — La squadra di Gasperini ha terminato la League Phase all\'ultimo posto utile per la qualificazione diretta. In Europa sa soffrire e ripartire. **Quota vittoria diretta: 2.35, X: 2.10**. Analisi SofaScore: difesa da rivedere.',
+  'villa': '🔍 **Aston Villa** — Emery ha vinto l\'EL per 4 volte. Villa favorito vs Lille (q2.40). Il recente ko con Chelsea (1-4) pesa, ma in Europa il tecnico spagnolo sa sempre alzare il livello. Consiglio: **2 con "Home No Bet" q1.57**.',
+  'nottingham': '🔍 **Nottingham Forest** — Netto favorito con 52% di probabilità. Midtjylland ha sovraperformato gli xG nella fase a gironi (+0.5 gol/partita sopra aspettative): probabile regressione. **Forest 1 q1.75** — Alta fiducia (79%). Ottimo valore.',
+  'braga': '🔍 **Sporting Braga** — Solo 2 gol subiti in 7 trasferte europee stagionali. Difesa straordinaria. Ferencváros in casa è pericoloso, ma il Braga parte favorito. **2 q2.15, Under 2.5 q1.90**.',
+  'default': '⚽ Posso analizzare qualsiasi partita di oggi! Prova a chiedermi di: **Bologna-Roma, Lille-Aston Villa, Nottingham Forest, Celta Vigo, Braga, Genk-Friburgo** oppure chiedi **"migliori quote della giornata"** o **"partita più sicura oggi"**.',
+};
+
+let currentFilter = 'all';
+let sortAsc = true;
+
+function getCompClass(comp) {
+  return {UEL:'lb-uel',UCL:'lb-ucl',SA:'lb-sa',PL:'lb-pl',BUND:'lb-bund',LIGA:'lb-liga'}[comp] || 'lb-sa';
+}
+
+function getConfColor(c) {
+  if(c>=75) return 'var(--accent)';
+  if(c>=65) return 'var(--amber)';
+  return 'var(--accent3)';
+}
+
+function buildCard(m) {
+  const tagsHTML = m.tags.map((t,i)=>`<span class="tag ${m.tagTypes[i]||'tag-gray'}">${t}</span>`).join('');
+  return `
+    <div class="match-card" onclick="openModal(${m.id})" data-comp="${m.comp}" data-conf="${m.conf}">
+      <div class="card-header">
+        <div class="comp-badge">
+          <div class="comp-dot"></div>
+          <span class="league-badge ${getCompClass(m.comp)}">${m.compLabel}</span>
+        </div>
+        <span class="time-badge">⏰ ${m.slot}</span>
+      </div>
+      <div class="card-body">
+        <div class="teams-row">
+          <div class="team-block">
+            <div class="team-name">${m.home}</div>
+            <div class="team-rank">Casa ${m.flag?.charAt(0)||''}</div>
+          </div>
+          <div class="score-box">
+            <div class="score-val">vs</div>
+            <div class="score-label">andata</div>
+          </div>
+          <div class="team-block" style="text-align:right">
+            <div class="team-name">${m.away}</div>
+            <div class="team-rank">Ospite ${m.flag?.charAt(2)||''}</div>
+          </div>
+        </div>
+        <div class="prob-section">
+          <div class="prob-bar-wrap">
+            <div class="pb-1" style="width:${m.prob1}%"></div>
+            <div class="pb-x" style="width:${m.probX}%"></div>
+            <div class="pb-2" style="width:${m.prob2}%"></div>
+          </div>
+          <div class="prob-labels">
+            <div class="pl-item"><div class="pl-pct">${m.prob1}%</div><div class="pl-name">1</div></div>
+            <div class="pl-item"><div class="pl-pct">${m.probX}%</div><div class="pl-name">X</div></div>
+            <div class="pl-item"><div class="pl-pct">${m.prob2}%</div><div class="pl-name">2</div></div>
+          </div>
+        </div>
+        <div class="tags-row">${tagsHTML}</div>
+        <div class="confidence-row">
+          <span class="conf-label">Fiducia</span>
+          <div class="conf-bar"><div class="conf-fill" style="width:${m.conf}%;background:${getConfColor(m.conf)}"></div></div>
+          <span class="conf-val" style="color:${getConfColor(m.conf)}">${m.conf}%</span>
+        </div>
+        <div class="prono-footer">
+          <div>
+            <div class="prono-label">Pronostico</div>
+            <div class="prono-result">${m.prono}</div>
+          </div>
+          <div class="quota-pill">q ${m.quota}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderGrid(container, matches) {
+  const el = document.getElementById(container);
+  if(!el) return;
+  let filtered = matches;
+  if(currentFilter !== 'all') filtered = matches.filter(m => m.comp === currentFilter);
+  const q = document.getElementById('searchInput')?.value.toLowerCase() || '';
+  if(q) filtered = filtered.filter(m => (m.home+m.away+m.compLabel).toLowerCase().includes(q));
+  if(!filtered.length) { el.innerHTML = '<div class="loading-state"><div style="font-size:32px;margin-bottom:12px">🔍</div><div>Nessuna partita trovata</div></div>'; return; }
+  el.innerHTML = filtered.map(buildCard).join('');
+}
+
+function filterByComp(comp, btn) {
+  currentFilter = comp;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid('matchesGrid', MATCHES);
+}
+
+function filterCards() { renderGrid('matchesGrid', MATCHES); }
+
+function sortByConf() {
+  MATCHES.sort((a,b) => sortAsc ? b.conf - a.conf : a.conf - b.conf);
+  sortAsc = !sortAsc;
+  renderGrid('matchesGrid', MATCHES);
+}
+
+function openModal(id) {
+  const m = [...MATCHES,...DOMANI_MATCHES].find(x=>x.id===id);
+  if(!m) return;
+  document.getElementById('modalTitle').textContent = `${m.home} vs ${m.away}`;
+  const srcColors = {agree:'sa-agree',partial:'sa-partial',diff:'sa-diff'};
+  const srcLabels = {agree:'✓ Concorda','partial':'~ Parziale','diff':'✗ Differisce'};
+  const srcHTML = m.sources.length ? m.sources.map(s=>`
+    <div class="source-analysis-row">
+      <span class="sa-name">${s.n}</span>
+      <span class="sa-result ${srcColors[s.a]}">${s.r}</span>
+      <span class="sa-conf ${srcColors[s.a]}">${srcLabels[s.a]}</span>
+    </div>`).join('') : '<p style="color:var(--text3);font-size:13px">Dati non disponibili per questa partita.</p>';
+
+  document.getElementById('modalBody').innerHTML = `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <span class="league-badge ${getCompClass(m.comp)}">${m.compLabel}</span>
+      <span class="tag tag-gray">⏰ ${m.slot}</span>
+      <span class="tag" style="background:rgba(0,229,160,0.1);color:var(--accent);border:1px solid rgba(0,229,160,0.25)">Fiducia: ${m.conf}%</span>
+    </div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px">${m.info}</p>
+    <div class="modal-section-title">Probabilità 1X2</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <div style="flex:1;background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border)">
+        <div style="font-size:22px;font-weight:800;font-family:var(--font-head);color:var(--accent2)">${m.prob1}%</div>
+        <div style="font-size:11px;color:var(--text3)">1 — ${m.home}</div>
+      </div>
+      <div style="flex:1;background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border)">
+        <div style="font-size:22px;font-weight:800;font-family:var(--font-head);color:var(--text3)">${m.probX}%</div>
+        <div style="font-size:11px;color:var(--text3)">X — Pareggio</div>
+      </div>
+      <div style="flex:1;background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border)">
+        <div style="font-size:22px;font-weight:800;font-family:var(--font-head);color:var(--accent)">${m.prob2}%</div>
+        <div style="font-size:11px;color:var(--text3)">2 — ${m.away}</div>
+      </div>
+    </div>
+    <div class="modal-section-title">Pronostico finale</div>
+    <div style="background:rgba(0,229,160,0.07);border:1px solid rgba(0,229,160,0.2);border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Risultato atteso</div>
+        <div style="font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--accent)">${m.prono}</div>
+      </div>
+      <div class="quota-pill" style="font-size:14px;padding:6px 14px">q ${m.quota}</div>
+    </div>
+    <div class="modal-section-title">Analisi per fonte (${m.sources.length} fonti)</div>
+    ${srcHTML}
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if(!e || e.target === document.getElementById('modalOverlay')) {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+}
+
+function switchTab(t) {
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    const tabs=['oggi','domani','live','classifica','analisi','fonti'];
+    b.classList.toggle('active', tabs[i]===t);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-'+t)?.classList.add('active');
+  if(t==='domani' && !document.getElementById('domaniGrid').innerHTML) renderGrid('domaniGrid', DOMANI_MATCHES);
+  if(t==='fonti') renderFonti();
+  if(t==='analisi') renderAnalisi();
+  if(t==='classifica') renderClassifica();
+}
+
+function renderFonti() {
+  const cats = [...new Set(FONTI.map(f=>f.cat))];
+  const html = cats.map(cat=>`
+    <div style="margin-bottom:24px">
+      <div class="section-header"><div class="section-title">${cat} <span class="section-count">${FONTI.filter(f=>f.cat===cat).length}</span></div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
+        ${FONTI.filter(f=>f.cat===cat).map(f=>`
+          <div class="source-chip" style="flex-direction:column;align-items:flex-start;padding:12px;border-radius:10px;cursor:default">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <span style="font-size:20px">${f.icon}</span>
+              <div>
+                <div style="font-weight:600;font-size:13px;color:var(--text)">${f.name}</div>
+                <div class="source-cat">${f.cat}</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--text3);line-height:1.5">${f.desc}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+  document.getElementById('fontiContent').innerHTML = html;
+}
+
+function renderAnalisi() {
+  const html = MATCHES.map(m=>`
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span class="league-badge ${getCompClass(m.comp)}">${m.compLabel}</span>
+        <span style="font-family:var(--font-head);font-size:17px;font-weight:700">${m.home} vs ${m.away}</span>
+        <span style="font-size:11px;color:var(--text3);margin-left:auto">⏰ ${m.slot}</span>
+      </div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px">${m.info}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="tag tag-green">📊 Pronostico: ${m.prono}</span>
+        <span class="tag tag-amber">💰 Quota: ${m.quota}</span>
+        <span class="tag ${m.conf>=75?'tag-green':m.conf>=65?'tag-amber':'tag-red'}">🎯 Fiducia: ${m.conf}%</span>
+        <span class="tag tag-gray">📡 ${m.sources.length} fonti</span>
+      </div>
+    </div>`).join('');
+  document.getElementById('analisiContent').innerHTML = html;
+}
+
+function renderClassifica() {
+  const classifiche = [
+    {name:'Europa League', items:[{t:'Aston Villa',p:18},{t:'Roma',p:15},{t:'Bologna',p:14},{t:'Nottingham Forest',p:13},{t:'Braga',p:13},{t:'Midtjylland',p:12}]},
+    {name:'Serie A', items:[{t:'Inter',p:62},{t:'Napoli',p:58},{t:'Lazio',p:55},{t:'Atalanta',p:52},{t:'Milan',p:50},{t:'Juventus',p:48}]},
+    {name:'Premier League', items:[{t:'Liverpool',p:70},{t:'Arsenal',p:61},{t:'Man City',p:58},{t:'Chelsea',p:54},{t:'Newcastle',p:51},{t:'Aston Villa',p:49}]},
+  ];
+  const html = classifiche.map(c=>`
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <div style="padding:12px 16px;background:var(--bg4);border-bottom:1px solid var(--border)">
+        <div class="section-title" style="font-size:14px">${c.name}</div>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        ${c.items.map((r,i)=>`
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:10px 14px;font-size:12px;color:var(--text3);width:24px">${i+1}</td>
+            <td style="padding:10px 4px;font-size:13px;font-weight:500;color:var(--text)">${r.t}</td>
+            <td style="padding:10px 14px;font-size:13px;font-weight:700;color:var(--accent);text-align:right">${r.p} pt</td>
+          </tr>`).join('')}
+      </table>
+    </div>`).join('');
+  document.getElementById('classGrid').innerHTML = html;
+}
+
+function toggleAI() {
+  const p = document.getElementById('aiPanel');
+  p.classList.toggle('visible');
+}
+
+function sendAIMsg() {
+  const inp = document.getElementById('aiInput');
+  const q = inp.value.trim(); if(!q) return;
+  const msgs = document.getElementById('aiMessages');
+  msgs.innerHTML += `<div class="ai-msg user">${q}</div>`;
+  inp.value = '';
+  const lower = q.toLowerCase();
+  let resp = AI_RESPONSES.default;
+  for(const [k,v] of Object.entries(AI_RESPONSES)) {
+    if(lower.includes(k)) { resp = v; break; }
+  }
+  setTimeout(()=>{
+    msgs.innerHTML += `<div class="ai-msg bot">${resp.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 700);
+}
+
+function buildTicker() {
+  const items = [
+    'Bologna–Roma ore 18:45 • Derby italiano Europa League',
+    'Aston Villa favorito vs Lille • q 2.40',
+    'Nottingham Forest • Alta fiducia 79%',
+    'Braga difesa di ferro • 2 gol subiti in 7 trasferte',
+    'Betis Siviglia • 1 vittoria su 18 vs Spagna per il Panathinaikos',
+    'Stoccarda–Porto • GG q 1.57',
+    'Celta Vigo–Lione • Partita equilibrata • 1X q 1.45',
+    'Genk • 17 gol segnati in EL questa stagione',
+  ];
+  const doubled = [...items,...items];
+  document.getElementById('tickerInner').innerHTML = doubled.map(i=>`
+    <div class="ticker-item"><div class="ticker-dot"></div><span>${i}</span></div>`).join('');
+}
+
+// INIT
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderGrid('matchesGrid', MATCHES);
+  buildTicker();
+});
+</script>
+</body>
+</html>
