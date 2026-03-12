@@ -2,1206 +2,1526 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PronoAI — Pronostici Sportivi</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PRONOapp — Pronostici Sportivi AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0c10;
-    --bg2: #0f1218;
-    --bg3: #161b24;
-    --bg4: #1e2535;
-    --accent: #00e5a0;
-    --accent2: #0084ff;
-    --accent3: #ff4d4d;
-    --amber: #ffb81c;
-    --text: #f0f4ff;
-    --text2: #8892a4;
-    --text3: #4e5a6b;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.12);
-    --font-head: 'Barlow Condensed', sans-serif;
-    --font-body: 'Barlow', sans-serif;
-    --card-radius: 12px;
-    --glow: 0 0 30px rgba(0,229,160,0.15);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-body);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* BG GRID */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* TOPBAR */
-  .topbar {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(10,12,16,0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border2);
-    padding: 0 24px;
-    display: flex; align-items: center; justify-content: space-between;
-    height: 60px;
-  }
-  .logo {
-    display: flex; align-items: center; gap: 10px;
-    font-family: var(--font-head);
-    font-size: 22px; font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  .logo-icon {
-    width: 34px; height: 34px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; color: #000;
-  }
-  .logo span { color: var(--accent); }
-  .topbar-right { display: flex; align-items: center; gap: 12px; }
-  .live-badge {
-    display: flex; align-items: center; gap: 6px;
-    background: rgba(255,77,77,0.15);
-    border: 1px solid rgba(255,77,77,0.3);
-    color: var(--accent3);
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px; font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-  .live-dot {
-    width: 6px; height: 6px;
-    background: var(--accent3);
-    border-radius: 50%;
-    animation: pulse 1.2s ease-in-out infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
-
-  /* NAV TABS */
-  .nav-tabs {
-    display: flex; gap: 0;
-    padding: 0 24px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg2);
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .nav-tabs::-webkit-scrollbar { display: none; }
-  .tab-btn {
-    font-family: var(--font-head);
-    font-size: 13px; font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 14px 20px;
-    background: none; border: none;
-    color: var(--text2);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-  /* MAIN */
-  main { position: relative; z-index: 1; padding: 24px; max-width: 1100px; margin: 0 auto; }
-
-  /* HERO SEARCH */
-  .hero-search {
-    display: flex; gap: 10px;
-    margin-bottom: 28px;
-    animation: fadeUp 0.5s ease both;
-  }
-  .search-wrap {
-    flex: 1; position: relative;
-  }
-  .search-input {
-    width: 100%; background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: var(--card-radius);
-    color: var(--text); font-family: var(--font-body);
-    font-size: 14px; padding: 12px 16px 12px 44px;
-    outline: none; transition: border-color 0.2s;
-  }
-  .search-input:focus { border-color: var(--accent); }
-  .search-input::placeholder { color: var(--text3); }
-  .search-icon {
-    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-    color: var(--text3); font-size: 16px;
-  }
-  .search-btn {
-    background: var(--accent); color: #000;
-    border: none; border-radius: var(--card-radius);
-    font-family: var(--font-head); font-weight: 700;
-    font-size: 13px; letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 12px 20px; cursor: pointer;
-    transition: all 0.2s; white-space: nowrap;
-  }
-  .search-btn:hover { background: #00c78a; transform: translateY(-1px); }
-
-  /* SECTION HEADER */
-  .section-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .section-title {
-    font-family: var(--font-head);
-    font-size: 18px; font-weight: 700;
-    letter-spacing: 0.05em; text-transform: uppercase;
-    color: var(--text);
-    display: flex; align-items: center; gap: 10px;
-  }
-  .section-title::before {
-    content: '';
-    display: block;
-    width: 4px; height: 18px;
-    background: var(--accent);
-    border-radius: 2px;
-  }
-  .section-count {
-    font-size: 11px; background: var(--bg4);
-    color: var(--text2); padding: 2px 8px; border-radius: 10px;
-    font-family: var(--font-body); font-weight: 500;
-  }
-  .see-all {
-    font-size: 12px; color: var(--accent2); cursor: pointer;
-    font-weight: 500; letter-spacing: 0.03em;
-    text-decoration: none; background: none; border: none;
-  }
-
-  /* MATCH CARDS GRID */
-  .matches-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 14px;
-    margin-bottom: 32px;
-  }
-
-  /* MATCH CARD */
-  .match-card {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--card-radius);
-    overflow: hidden;
-    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-    cursor: pointer;
-    animation: fadeUp 0.4s ease both;
-  }
-  .match-card:hover {
-    transform: translateY(-3px);
-    border-color: var(--border2);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  }
-  .card-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 14px;
-    background: var(--bg4);
-    border-bottom: 1px solid var(--border);
-  }
-  .comp-badge {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 10px; font-weight: 600;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    color: var(--text2);
-  }
-  .comp-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-  .time-badge {
-    font-size: 11px; color: var(--text3);
-    font-weight: 500;
-  }
-  .live-indicator {
-    font-size: 10px; color: var(--accent3);
-    font-weight: 700; letter-spacing: 0.06em;
-    animation: pulse 1.2s ease infinite;
-  }
-
-  .card-body { padding: 14px; }
-  .teams-row {
-    display: flex; align-items: center;
-    gap: 8px; margin-bottom: 12px;
-  }
-  .team-block { flex: 1; }
-  .team-name {
-    font-family: var(--font-head);
-    font-size: 16px; font-weight: 700;
-    letter-spacing: 0.02em;
-    color: var(--text);
-    margin-bottom: 2px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .team-rank { font-size: 10px; color: var(--text3); }
-  .teams-row.away { text-align: right; }
-  .score-box {
-    min-width: 54px; text-align: center;
-    background: var(--bg4);
-    border-radius: 8px;
-    padding: 6px 8px;
-    border: 1px solid var(--border2);
-    flex-shrink: 0;
-  }
-  .score-val {
-    font-family: var(--font-head);
-    font-size: 20px; font-weight: 800;
-    color: var(--text);
-    letter-spacing: 0.04em;
-    line-height: 1;
-  }
-  .score-label { font-size: 9px; color: var(--text3); margin-top: 2px; }
-
-  /* PROB BAR */
-  .prob-section { margin-bottom: 12px; }
-  .prob-bar-wrap {
-    height: 5px; border-radius: 3px;
-    background: var(--bg4);
-    display: flex; overflow: hidden; gap: 2px;
-    margin: 6px 0;
-  }
-  .pb-1 { background: var(--accent2); border-radius: 3px 0 0 3px; }
-  .pb-x { background: var(--text3); }
-  .pb-2 { background: var(--accent); border-radius: 0 3px 3px 0; }
-  .prob-labels {
-    display: flex; justify-content: space-between;
-    font-size: 11px;
-  }
-  .pl-item { text-align: center; }
-  .pl-pct { font-weight: 600; color: var(--text); }
-  .pl-name { color: var(--text3); font-size: 10px; }
-
-  /* TAGS */
-  .tags-row {
-    display: flex; gap: 6px; flex-wrap: wrap;
-    margin-bottom: 10px;
-  }
-  .tag {
-    font-size: 10px; font-weight: 600;
-    padding: 3px 9px; border-radius: 20px;
-    letter-spacing: 0.04em; text-transform: uppercase;
-  }
-  .tag-green { background: rgba(0,229,160,0.12); color: var(--accent); border: 1px solid rgba(0,229,160,0.25); }
-  .tag-blue { background: rgba(0,132,255,0.12); color: var(--accent2); border: 1px solid rgba(0,132,255,0.25); }
-  .tag-amber { background: rgba(255,184,28,0.12); color: var(--amber); border: 1px solid rgba(255,184,28,0.25); }
-  .tag-red { background: rgba(255,77,77,0.12); color: var(--accent3); border: 1px solid rgba(255,77,77,0.25); }
-  .tag-gray { background: rgba(255,255,255,0.06); color: var(--text2); border: 1px solid var(--border2); }
-
-  /* PRONOSTICO RESULT */
-  .prono-footer {
-    display: flex; align-items: center; justify-content: space-between;
-    padding-top: 10px; border-top: 1px solid var(--border);
-  }
-  .prono-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
-  .prono-result {
-    font-family: var(--font-head);
-    font-size: 14px; font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 0.04em;
-  }
-  .quota-pill {
-    background: rgba(255,184,28,0.12);
-    border: 1px solid rgba(255,184,28,0.3);
-    color: var(--amber);
-    font-size: 11px; font-weight: 700;
-    padding: 3px 9px; border-radius: 20px;
-  }
-
-  /* CONFIDENCE METER */
-  .confidence-row {
-    display: flex; align-items: center; gap: 8px;
-    margin-top: 6px;
-  }
-  .conf-label { font-size: 10px; color: var(--text3); flex-shrink: 0; }
-  .conf-bar {
-    flex: 1; height: 3px; background: var(--bg4); border-radius: 2px; overflow: hidden;
-  }
-  .conf-fill { height: 100%; border-radius: 2px; }
-  .conf-val { font-size: 10px; color: var(--text2); font-weight: 600; }
-
-  /* SOURCES PANEL */
-  .sources-panel {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--card-radius);
-    padding: 16px;
-    margin-bottom: 28px;
-    animation: fadeUp 0.6s ease both;
-  }
-  .sources-title {
-    font-family: var(--font-head);
-    font-size: 12px; font-weight: 700;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--text3); margin-bottom: 12px;
-  }
-  .sources-grid {
-    display: flex; flex-wrap: wrap; gap: 8px;
-  }
-  .source-chip {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--bg4);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 11px; font-weight: 500;
-    color: var(--text2);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .source-chip:hover, .source-chip.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(0,229,160,0.06);
-  }
-  .source-icon { font-size: 14px; }
-  .source-cat {
-    font-size: 9px; color: var(--text3);
-    text-transform: uppercase; letter-spacing: 0.06em;
-  }
-
-  /* STATS ROW */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-bottom: 28px;
-    animation: fadeUp 0.3s ease both;
-  }
-  .stat-card {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--card-radius);
-    padding: 14px;
-    text-align: center;
-    transition: border-color 0.2s;
-  }
-  .stat-card:hover { border-color: var(--border2); }
-  .stat-val {
-    font-family: var(--font-head);
-    font-size: 28px; font-weight: 800;
-    color: var(--accent);
-    letter-spacing: 0.02em;
-    line-height: 1;
-  }
-  .stat-name { font-size: 11px; color: var(--text3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
-
-  /* AI CHAT PANEL */
-  .ai-panel {
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: var(--card-radius);
-    overflow: hidden;
-    margin-bottom: 28px;
-    animation: fadeUp 0.7s ease both;
-    display: none;
-  }
-  .ai-panel.visible { display: block; }
-  .ai-panel-header {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 16px;
-    background: linear-gradient(135deg, rgba(0,229,160,0.08), rgba(0,132,255,0.06));
-    border-bottom: 1px solid var(--border);
-  }
-  .ai-avatar {
-    width: 32px; height: 32px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-  }
-  .ai-name { font-weight: 600; font-size: 13px; }
-  .ai-desc { font-size: 11px; color: var(--text3); }
-  .ai-messages { padding: 16px; max-height: 280px; overflow-y: auto; }
-  .ai-msg {
-    margin-bottom: 12px;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 13px; line-height: 1.6;
-    animation: fadeUp 0.3s ease both;
-  }
-  .ai-msg.bot { background: var(--bg4); color: var(--text); border-left: 2px solid var(--accent); }
-  .ai-msg.user { background: rgba(0,132,255,0.1); color: var(--text2); text-align: right; border-right: 2px solid var(--accent2); }
-  .ai-input-row {
-    display: flex; gap: 8px;
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-  }
-  .ai-input {
-    flex: 1; background: var(--bg4);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text); font-family: var(--font-body);
-    font-size: 13px; padding: 9px 12px;
-    outline: none; transition: border-color 0.2s;
-  }
-  .ai-input:focus { border-color: var(--accent); }
-  .ai-send {
-    background: var(--accent); color: #000;
-    border: none; border-radius: 8px;
-    font-weight: 700; font-size: 13px;
-    padding: 0 16px; cursor: pointer;
-    transition: background 0.2s;
-  }
-  .ai-send:hover { background: #00c78a; }
-  .ai-toggle-btn {
-    background: rgba(0,229,160,0.1);
-    border: 1px solid rgba(0,229,160,0.3);
-    color: var(--accent);
-    border-radius: 8px;
-    font-size: 12px; font-weight: 600;
-    padding: 7px 14px; cursor: pointer;
-    transition: all 0.2s;
-    font-family: var(--font-body);
-  }
-  .ai-toggle-btn:hover { background: rgba(0,229,160,0.18); }
-
-  /* MODAL */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.75); z-index: 1000;
-    backdrop-filter: blur(4px);
-    align-items: center; justify-content: center;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: 16px;
-    max-width: 520px; width: 92%;
-    max-height: 85vh;
-    overflow-y: auto;
-    animation: scaleIn 0.25s ease;
-  }
-  @keyframes scaleIn { from{transform:scale(0.93);opacity:0} to{transform:scale(1);opacity:1} }
-  .modal-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; background: var(--bg2);
-    border-radius: 16px 16px 0 0;
-  }
-  .modal-title { font-family: var(--font-head); font-size: 17px; font-weight: 700; letter-spacing: 0.04em; }
-  .modal-close {
-    background: var(--bg4); border: none;
-    width: 28px; height: 28px; border-radius: 50%;
-    color: var(--text2); font-size: 14px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-  }
-  .modal-close:hover { background: var(--accent3); color: #fff; }
-  .modal-body { padding: 20px; }
-  .modal-section-title {
-    font-size: 11px; color: var(--text3);
-    text-transform: uppercase; letter-spacing: 0.07em;
-    margin-bottom: 10px; margin-top: 16px;
-  }
-  .modal-section-title:first-child { margin-top: 0; }
-  .source-analysis-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 9px 12px;
-    background: var(--bg3);
-    border-radius: 8px; margin-bottom: 6px;
-    border: 1px solid var(--border);
-  }
-  .sa-name { font-size: 13px; font-weight: 500; }
-  .sa-result {
-    font-family: var(--font-head);
-    font-size: 13px; font-weight: 700;
-  }
-  .sa-conf { font-size: 11px; color: var(--text3); }
-  .sa-agree { color: var(--accent); }
-  .sa-partial { color: var(--amber); }
-  .sa-diff { color: var(--accent3); }
-
-  /* FILTER BAR */
-  .filter-bar {
-    display: flex; gap: 8px; margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-  .filter-btn {
-    font-family: var(--font-head); font-size: 11px; font-weight: 700;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 7px 14px; border-radius: 20px;
-    background: var(--bg3); border: 1px solid var(--border);
-    color: var(--text2); cursor: pointer;
-    transition: all 0.2s;
-  }
-  .filter-btn:hover { border-color: var(--border2); color: var(--text); }
-  .filter-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
-
-  /* LOADING */
-  .loading-state {
-    text-align: center; padding: 48px;
-    color: var(--text3); font-size: 14px;
-  }
-  .spinner {
-    width: 36px; height: 36px;
-    border: 2px solid var(--border2);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 16px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* TABS CONTENT */
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-
-  /* TICKER */
-  .ticker-wrap {
-    background: rgba(0,229,160,0.06);
-    border-top: 1px solid rgba(0,229,160,0.15);
-    border-bottom: 1px solid rgba(0,229,160,0.15);
-    padding: 8px 0; overflow: hidden;
-    margin-bottom: 24px;
-  }
-  .ticker {
-    display: flex; gap: 40px;
-    white-space: nowrap;
-    animation: scrollTicker 30s linear infinite;
-  }
-  @keyframes scrollTicker {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-  .ticker-item {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 12px; color: var(--text2); flex-shrink: 0;
-  }
-  .ticker-item strong { color: var(--text); font-weight: 600; }
-  .ticker-dot { width: 4px; height: 4px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
-
-  /* DISCLAIMER */
-  .disclaimer {
-    background: rgba(255,184,28,0.06);
-    border: 1px solid rgba(255,184,28,0.2);
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 11px; color: var(--amber);
-    line-height: 1.6; margin-bottom: 28px;
-  }
-  .disclaimer strong { font-weight: 600; }
-
-  /* ANIMATIONS */
-  @keyframes fadeUp {
-    from { opacity:0; transform: translateY(12px); }
-    to { opacity:1; transform: translateY(0); }
-  }
-
-  /* LEAGUE BADGE */
-  .league-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  .lb-uel { background: rgba(255,102,0,0.15); color: #ff7733; border: 1px solid rgba(255,102,0,0.3); }
-  .lb-ucl { background: rgba(0,132,255,0.12); color: var(--accent2); border: 1px solid rgba(0,132,255,0.25); }
-  .lb-sa { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.25); }
-  .lb-pl { background: rgba(140,40,250,0.12); color: #b068ff; border: 1px solid rgba(140,40,250,0.25); }
-  .lb-bund { background: rgba(255,184,28,0.12); color: var(--amber); border: 1px solid rgba(255,184,28,0.25); }
-  .lb-liga { background: rgba(255,40,60,0.12); color: #ff6070; border: 1px solid rgba(255,40,60,0.25); }
-
-  /* RESPONSIVE */
-  @media(max-width:600px) {
-    main { padding: 16px; }
-    .matches-grid { grid-template-columns: 1fr; }
-    .topbar { padding: 0 16px; }
-    .hero-search { flex-direction: column; }
-  }
+:root{
+  --bg:#0a0c10;--bg2:#0f1117;--bg3:#141820;--bg4:#1a1f2e;
+  --border:#1e2535;--border2:#252d40;
+  --accent:#00e5a0;--accent2:#3d8bff;--accent3:#ff4d4d;--amber:#f5a623;
+  --text:#e8eaf0;--text2:#8892a4;--text3:#4a5568;
+  --font-head:'Barlow Condensed',sans-serif;
+  --font:'Barlow',sans-serif;
+  --card-radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;min-height:100vh;
+  background-image:radial-gradient(circle at 20% 20%,rgba(61,139,255,.04) 0,transparent 50%),
+  radial-gradient(circle at 80% 80%,rgba(0,229,160,.03) 0,transparent 50%),
+  repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(255,255,255,.008) 40px,rgba(255,255,255,.008) 41px),
+  repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(255,255,255,.008) 40px,rgba(255,255,255,.008) 41px);
+}
+ 
+/* TOPBAR */
+.topbar{height:62px;background:linear-gradient(180deg,rgba(0,10,8,.98),rgba(10,12,16,.96));backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,229,160,.25);box-shadow:0 1px 0 rgba(0,229,160,.08),0 8px 32px rgba(0,0,0,.6);padding:0 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,150,.6) 50%,transparent);animation:scanGlow 4s ease-in-out infinite;}
+@keyframes scanGlow{0%,100%{opacity:.4}50%{opacity:1}}
+.topbar::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,150,.55) 50%,transparent);animation:scanGlow 4s ease-in-out infinite;}
+@keyframes scanGlow{0%,100%{opacity:.5}50%{opacity:1}}
+.logo{display:flex;align-items:center;gap:12px;cursor:default;user-select:none;}
+.logo-text{display:flex;flex-direction:column;line-height:1;}
+.brand-main{font-family:var(--font-head);font-size:26px;font-weight:900;letter-spacing:.07em;background:linear-gradient(90deg,#f0f4ff 30%,#00ff9d 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.brand-main em{font-style:normal;background:linear-gradient(90deg,#00ff9d,#00e5a0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:8px;font-weight:600;letter-spacing:.18em;color:rgba(0,229,160,.55);text-transform:uppercase;font-family:var(--font-body);margin-top:2px;}
+.logo em{font-style:normal;font-weight:400;}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#00ff9d,#009960);border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(0,255,157,.5),0 0 30px rgba(0,255,157,.18);flex-shrink:0;}
+.logo-icon svg{width:18px;height:18px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.live-badge{display:flex;align-items:center;gap:5px;background:rgba(255,77,77,.12);border:1px solid rgba(255,77,77,.3);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:var(--accent3);font-family:var(--font-head);letter-spacing:.06em;}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--accent3);animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.date-badge{font-size:10px;color:var(--text3);font-family:var(--font-head);}
+ 
+/* NAV */
+.nav-tabs{display:flex;overflow-x:auto;scrollbar-width:none;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 16px;gap:2px;position:sticky;top:58px;z-index:99;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.tab-btn{background:none;border:none;color:var(--text2);font-family:var(--font-head);font-size:13px;font-weight:700;letter-spacing:.05em;padding:12px 14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;text-transform:uppercase;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:#00ff9d;border-bottom-color:#00ff9d;text-shadow:0 0 10px rgba(0,255,157,.5);}
+ 
+/* AUTO-UPDATE BAR */
+.update-bar{background:rgba(10,12,16,.98);border-bottom:1px solid var(--border);padding:6px 20px;display:flex;align-items:center;justify-content:space-between;font-size:11px;position:sticky;top:104px;z-index:98;}
+.upd-left{display:flex;align-items:center;gap:8px;color:var(--text2);}
+.upd-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .4s;}
+.upd-dot.ok{background:var(--accent);}
+.upd-dot.spin{background:var(--amber);animation:pulse .7s infinite;}
+.upd-dot.err{background:var(--accent3);}
+.upd-right{display:flex;align-items:center;gap:8px;}
+.upd-next{font-size:10px;color:var(--text3);font-family:var(--font-head);}
+.btn-refresh{background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:4px 11px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.05em;transition:all .2s;font-family:var(--font-head);text-transform:uppercase;}
+.btn-refresh:hover:not(:disabled){background:var(--accent);color:#000;border-color:var(--accent);}
+.btn-refresh:disabled{opacity:.35;cursor:not-allowed;}
+ 
+/* PROGRESS */
+.prog{position:fixed;top:0;left:0;right:0;height:2px;z-index:999;pointer-events:none;}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .2s linear;}
+ 
+/* TICKER */
+.ticker-wrap{background:linear-gradient(90deg,rgba(0,0,0,.6),rgba(0,18,12,.7) 50%,rgba(0,0,0,.6));border-bottom:1px solid rgba(0,229,160,.12);overflow:hidden;position:relative;height:34px;display:flex;align-items:center;}
+.ticker{display:inline-block;white-space:nowrap;font-size:11px;color:rgba(160,200,185,.85);animation:tickscroll 50s linear infinite;padding:0 80px;}
+@keyframes tickscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker:hover{animation-play-state:paused;}
+ 
+/* MAIN */
+main{padding:20px;max-width:1400px;margin:0 auto;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+ 
+/* STATS ROW */
+.stats-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--card-radius);padding:14px 18px;flex:1;min-width:100px;}
+.stat-val{font-family:var(--font-head);font-size:26px;font-weight:800;line-height:1;color:var(--accent2);}
+.stat-name{font-size:10px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.05em;}
+ 
+/* SEARCH */
+.hero-search{display:flex;gap:10px;margin-bottom:14px;}
+.search-wrap{flex:1;position:relative;}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;}
+.search-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 14px 10px 36px;color:var(--text);font-size:13px;outline:none;transition:border .2s;}
+.search-input:focus{border-color:var(--accent2);}
+.search-btn{background:var(--accent2);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-family:var(--font-head);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity .2s;}
+.search-btn:hover{opacity:.85;}
+ 
+/* AI PANEL */
+.ai-panel{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--card-radius);overflow:hidden;margin-bottom:14px;display:none;}
+.ai-panel.visible{display:block;}
+.ai-panel-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);}
+.ai-avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--accent2),var(--accent));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.ai-name{font-family:var(--font-head);font-weight:700;font-size:15px;}
+.ai-desc{font-size:10px;color:var(--text3);}
+.ai-messages{padding:14px 16px;max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+.ai-msg{padding:10px 13px;border-radius:10px;font-size:12px;line-height:1.65;max-width:90%;}
+.ai-msg.bot{background:var(--bg4);border:1px solid var(--border);align-self:flex-start;}
+.ai-msg.user{background:rgba(61,139,255,.15);border:1px solid rgba(61,139,255,.25);color:var(--accent2);align-self:flex-end;text-align:right;}
+.ai-msg.typing{color:var(--text3);}
+.ai-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);}
+.ai-input{flex:1;background:var(--bg4);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:12px;outline:none;}
+.ai-send{background:var(--accent2);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:16px;cursor:pointer;font-weight:700;}
+ 
+/* FILTER BAR */
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.filter-btn{background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text2);font-family:var(--font-head);font-size:11px;font-weight:700;padding:5px 11px;cursor:pointer;letter-spacing:.04em;transition:all .2s;}
+.filter-btn:hover{color:var(--text);border-color:var(--border2);}
+.filter-btn.active{background:var(--accent);color:#000;border-color:var(--accent);}
+ 
+/* SECTION HEADER */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.section-title{font-family:var(--font-head);font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.section-count{background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;color:var(--text2);}
+.see-all{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);border-radius:7px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font-head);}
+.see-all:hover{color:var(--text);}
+ 
+/* MATCH GRID */
+.matches-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+.match-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--card-radius);overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s;position:relative;}
+.match-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);}
+.comp-badge{display:flex;align-items:center;gap:6px;}
+.comp-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);}
+.time-badge{font-size:10px;color:var(--text3);font-family:var(--font-head);font-weight:600;}
+.card-body{padding:13px 12px;}
+.teams-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:4px;}
+.team-block{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;min-width:0;overflow:hidden;}
+.team-name{font-family:var(--font-head);font-size:13px;font-weight:700;text-align:center;line-height:1.2;word-break:break-word;overflow-wrap:break-word;width:100%;}
+.team-rank{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;}
+.score-box{display:flex;flex-direction:column;align-items:center;padding:0 8px;}
+.score-val{font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--text3);}
+.score-label{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;}
+.prob-bar-wrap{height:6px;border-radius:3px;overflow:hidden;display:flex;margin-bottom:6px;}
+.pb-1{background:var(--accent2);height:100%;}
+.pb-x{background:var(--text3);height:100%;}
+.pb-2{background:var(--accent);height:100%;}
+.prob-labels{display:flex;justify-content:space-between;margin-bottom:10px;}
+.pl-item{text-align:center;flex:1;}
+.pl-pct{font-family:var(--font-head);font-size:13px;font-weight:700;}
+.pl-name{font-size:9px;color:var(--text3);}
+.tags-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
+.tag{border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;border:1px solid;}
+.tag-green{background:rgba(0,229,160,.1);border-color:rgba(0,229,160,.25);color:var(--accent);}
+.tag-amber{background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.25);color:var(--amber);}
+.tag-blue{background:rgba(61,139,255,.1);border-color:rgba(61,139,255,.25);color:var(--accent2);}
+.tag-red{background:rgba(255,77,77,.1);border-color:rgba(255,77,77,.25);color:var(--accent3);}
+.tag-gray{background:var(--bg4);border-color:var(--border2);color:var(--text2);}
+.confidence-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.conf-label{font-size:9px;color:var(--text3);flex-shrink:0;text-transform:uppercase;letter-spacing:.04em;}
+.conf-bar{flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;}
+.conf-fill{height:100%;border-radius:2px;}
+.conf-val{font-family:var(--font-head);font-size:12px;font-weight:700;flex-shrink:0;}
+.prono-footer{display:flex;align-items:center;justify-content:space-between;}
+.prono-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;}
+.prono-result{font-family:var(--font-head);font-size:15px;font-weight:800;color:var(--accent);}
+.quota-pill{background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.25);border-radius:7px;padding:4px 10px;font-family:var(--font-head);font-size:12px;font-weight:700;color:var(--amber);}
+ 
+/* RESULT BADGE */
+.result-badge{position:absolute;top:8px;right:8px;border-radius:6px;padding:2px 8px;font-family:var(--font-head);font-size:11px;font-weight:700;z-index:1;}
+.result-badge.live{background:rgba(255,77,77,.15);border:1px solid rgba(255,77,77,.35);color:var(--accent3);animation:pulse 1.2s infinite;}
+.result-badge.correct{background:rgba(0,229,160,.12);border:1px solid rgba(0,229,160,.3);color:var(--accent);}
+.result-badge.wrong{background:rgba(255,77,77,.1);border:1px solid rgba(255,77,77,.25);color:var(--accent3);}
+.result-badge.finished{background:var(--bg4);border:1px solid var(--border);color:var(--text2);}
+ 
+/* LEAGUE BADGES */
+.league-badge{border-radius:4px;padding:2px 6px;font-size:9px;font-weight:700;font-family:var(--font-head);letter-spacing:.04em;text-transform:uppercase;}
+.lb-ucl{background:rgba(61,139,255,.15);color:var(--accent2);}
+.lb-uel{background:rgba(255,119,51,.15);color:#ff7733;}
+.lb-ucnf{background:rgba(127,204,80,.15);color:#7fcc50;}
+.lb-sa{background:rgba(0,229,160,.15);color:var(--accent);}
+.lb-pl{background:rgba(148,0,211,.15);color:#9400d3;}
+.lb-bund{background:rgba(255,0,0,.15);color:#ff4444;}
+.lb-liga{background:rgba(255,165,0,.15);color:orange;}
+.lb-ligue1{background:rgba(0,120,255,.15);color:#0078ff;}
+.lb-erediv{background:rgba(255,90,0,.15);color:#ff5a00;}
+.lb-primeira{background:rgba(0,200,100,.15);color:#00c864;}
+.lb-superlig{background:rgba(255,215,0,.15);color:#ffd700;}
+ 
+/* DISCLAIMER */
+.disclaimer{background:rgba(61,139,255,.06);border:1px solid rgba(61,139,255,.15);border-radius:10px;padding:12px 16px;font-size:11px;color:var(--text3);line-height:1.6;margin-top:20px;text-align:center;}
+ 
+/* PLAYERS */
+.player-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;}
+.player-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--card-radius);padding:14px;cursor:pointer;transition:border-color .2s;}
+.player-card:hover{border-color:var(--border2);}
+.player-avatar{width:52px;height:52px;background:var(--bg4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;flex-shrink:0;}
+.player-name{font-family:var(--font-head);font-size:14px;font-weight:700;margin:6px 0 2px;}
+.player-team{font-size:10px;color:var(--text3);}
+.player-stats{display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.ps-item{text-align:center;flex:1;}
+.ps-val{font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--accent2);}
+.ps-label{font-size:8px;color:var(--text3);}
+.player-pos-badge{border-radius:4px;padding:2px 6px;font-size:9px;font-weight:700;font-family:var(--font-head);}
+.pos-att{background:rgba(255,77,77,.15);color:var(--accent3);}
+.pos-mid{background:rgba(61,139,255,.15);color:var(--accent2);}
+.pos-def{background:rgba(0,229,160,.15);color:var(--accent);}
+.pos-por{background:rgba(245,166,35,.15);color:var(--amber);}
+.player-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+ 
+/* CLASSIFICHE */
+.class-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px;}
+.class-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--card-radius);overflow:hidden;}
+.class-card-header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+.class-card-title{font-family:var(--font-head);font-size:16px;font-weight:800;}
+.class-updated{font-size:9px;color:var(--text3);margin-left:auto;}
+.class-table{width:100%;border-collapse:collapse;}
+.class-table td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.03);}
+.class-table tr:last-child td{border-bottom:none;}
+.class-table tr:hover td{background:var(--bg4);}
+.class-pos{font-family:var(--font-head);font-size:12px;font-weight:700;color:var(--text3);width:28px;text-align:center;}
+.class-pos.top3{color:var(--amber);}
+.class-team{font-size:12px;font-weight:600;}
+.class-pts{font-family:var(--font-head);font-size:14px;font-weight:800;color:var(--text);text-align:right;padding-right:12px;}
+.class-form{display:flex;gap:3px;justify-content:flex-end;}
+.form-dot{width:14px;height:14px;border-radius:3px;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);}
+.form-W{background:rgba(0,229,160,.2);color:var(--accent);}
+.form-D{background:rgba(245,166,35,.2);color:var(--amber);}
+.form-L{background:rgba(255,77,77,.2);color:var(--accent3);}
+.class-date{font-size:10px;color:var(--text3);margin-bottom:12px;}
+ 
+/* FONTI */
+.fonti-section{margin-bottom:28px;}
+.fonti-section-title{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.fonti-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;}
+.fonte-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--card-radius);padding:12px 14px;display:flex;flex-direction:column;gap:4px;}
+.fonte-name{font-family:var(--font-head);font-size:14px;font-weight:700;}
+.fonte-url{font-size:10px;color:var(--accent2);cursor:pointer;}
+.fonte-url:hover{text-decoration:underline;}
+.fonte-desc{font-size:10px;color:var(--text3);line-height:1.5;}
+.fonte-badge{display:inline-flex;align-items:center;gap:4px;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700;font-family:var(--font-head);margin-top:2px;}
+.fb-live{background:rgba(255,77,77,.12);border:1px solid rgba(255,77,77,.25);color:var(--accent3);}
+.fb-stats{background:rgba(61,139,255,.12);border:1px solid rgba(61,139,255,.25);color:var(--accent2);}
+.fb-news{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);color:var(--amber);}
+.fb-book{background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);color:var(--accent);}
+.fb-ai{background:rgba(148,0,211,.12);border:1px solid rgba(148,0,211,.25);color:#c84bff;}
+ 
+/* DATA SCIENCE */
+.ds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:22px;}
+.ds-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--card-radius);padding:14px;cursor:pointer;transition:border-color .2s;}
+.ds-card:hover{border-color:var(--border2);}
+.ds-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.ds-card-name{font-family:var(--font-head);font-size:16px;font-weight:800;}
+.ds-card-desc{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:10px;}
+.ds-card-tags{display:flex;flex-wrap:wrap;gap:4px;}
+.xg-table{width:100%;border-collapse:collapse;margin-bottom:22px;}
+.xg-table td,.xg-table th{padding:7px 10px;border-bottom:1px solid var(--border);}
+.xg-table th{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+.xg-bar{height:8px;border-radius:4px;display:inline-block;vertical-align:middle;margin-left:4px;}
+ 
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:520px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+.modal-title{font-family:var(--font-head);font-size:18px;font-weight:800;}
+.modal-close{background:var(--bg4);border:1px solid var(--border2);color:var(--text2);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+.modal-body{padding:18px 20px;overflow-y:auto;flex:1;}
+.modal-section-title{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:8px;margin-top:14px;}
+.source-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.source-row:last-child{border-bottom:none;}
+.src-name{color:var(--text2);font-weight:600;}
+.src-val{font-family:var(--font-head);font-size:12px;font-weight:700;}
+.src-agree{color:var(--accent);}
+.src-partial{color:var(--amber);}
+.src-diff{color:var(--accent3);}
+ 
+/* LOADING / EMPTY */
+.loading-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;}
+ 
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;z-index:9998;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;font-size:12px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);transform:translateY(80px);opacity:0;transition:all .4s cubic-bezier(.16,1,.3,1);max-width:320px;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast-msg{color:var(--text);line-height:1.5;}
+ 
+/* COPPE */
+.cup-section{margin-bottom:28px;}
+.cup-header{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:12px 12px 0 0;border-bottom:2px solid;}
+.cup-title{font-family:var(--font-head);font-size:18px;font-weight:800;letter-spacing:.04em;}
+.cup-desc{font-size:11px;color:var(--text3);}
+.cup-body{background:var(--bg2);border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;padding:14px;}
+.cup-group-title{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+ 
+/* RESPONSIVE */
+@media(max-width:600px){
+  main{padding:12px;}
+  .matches-grid{grid-template-columns:1fr;}
+  .class-grid{grid-template-columns:1fr;}
+  .topbar{padding:0 12px;}
+  .hero-search{flex-direction:column;}
+  .player-grid{grid-template-columns:repeat(2,1fr);}
+  .stats-row{gap:6px;}
+  .update-bar{flex-wrap:wrap;gap:4px;}
+  .upd-next{display:none;}
+  .fonti-grid{grid-template-columns:1fr 1fr;}
+}
 </style>
 </head>
 <body>
-
+ 
+<!-- PROGRESS BAR -->
+<div class="prog"><div class="prog-bar" id="progBar"></div></div>
+ 
+<!-- TOAST -->
+<div class="toast" id="toastEl"><span id="toastIcon">✅</span>&nbsp;<span class="toast-msg" id="toastMsg"></span></div>
+ 
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="logo">
-    <div class="logo-icon">⚽</div>
-    Prono<span>AI</span>
+  <div class="logo" onclick="switchTab('oggi')">
+    <div class="logo-icon">
+      <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polyline points="3,17 8,10 13,13 19,4" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <polyline points="14,4 19,4 19,9" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    PRONO<em>app</em>
   </div>
   <div class="topbar-right">
     <div class="live-badge"><div class="live-dot"></div>Live</div>
-    <span style="font-size:11px;color:var(--text3);">12 Mar 2026</span>
+    <span class="date-badge" id="dateBadge">—</span>
   </div>
 </div>
-
-<!-- NAV TABS -->
+ 
+<!-- NAV -->
 <div class="nav-tabs">
-  <button class="tab-btn active" onclick="switchTab('oggi')">Oggi</button>
-  <button class="tab-btn" onclick="switchTab('domani')">Domani</button>
-  <button class="tab-btn" onclick="switchTab('classifica')">Classifiche</button>
-  <button class="tab-btn" onclick="switchTab('analisi')">Analisi AI</button>
-  <button class="tab-btn" onclick="switchTab('fonti')">Fonti & Quote</button>
+  <button class="tab-btn active" onclick="switchTab('oggi')">📅 Pronostici</button>
+  <button class="tab-btn" onclick="switchTab('coppe')">🏆 Coppe EU</button>
+  <button class="tab-btn" onclick="switchTab('campionati')">⚽ Campionati</button>
+  <button class="tab-btn" onclick="switchTab('giocatori')">👤 Giocatori</button>
+  <button class="tab-btn" onclick="switchTab('classifiche')">📊 Classifiche</button>
+  <button class="tab-btn" onclick="switchTab('analisi')">🤖 Analisi AI</button>
+  <button class="tab-btn" onclick="switchTab('fonti')">🔗 Fonti</button>
+  <button class="tab-btn" onclick="switchTab('datascience')">🧬 Data Science</button>
 </div>
-
+ 
+<!-- AUTO-UPDATE BAR -->
+<div class="update-bar">
+  <div class="upd-left">
+    <div class="upd-dot" id="updDot"></div>
+    <span id="updText">Inizializzazione...</span>
+  </div>
+  <div class="upd-right">
+    <span class="upd-next" id="updNext"></span>
+    <button class="btn-refresh" id="btnRefresh" onclick="manualRefresh()">⟳ Aggiorna ora</button>
+  </div>
+</div>
+ 
 <!-- TICKER -->
-<div class="ticker-wrap">
-  <div class="ticker" id="tickerInner"></div>
-</div>
-
+<div class="ticker-wrap"><div class="ticker" id="tickerEl">
+  📊 PRONOapp caricamento in corso...&nbsp;&nbsp;&bull;&nbsp;&nbsp;📊 PRONOapp caricamento in corso...
+</div></div>
+ 
 <main>
-
+ 
 <!-- TAB OGGI -->
 <div class="tab-content active" id="tab-oggi">
-
-  <!-- STATS ROW -->
   <div class="stats-row">
-    <div class="stat-card"><div class="stat-val" id="countPartite">8</div><div class="stat-name">Partite oggi</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--accent2)">18</div><div class="stat-name">Fonti analizzate</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--amber)">73%</div><div class="stat-name">Accuratezza media</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--accent3)">3</div><div class="stat-name">Alta fiducia</div></div>
+    <div class="stat-card"><div class="stat-val" id="cntOggi">8</div><div class="stat-name">Partite oggi</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent2)" id="cntFonti">20</div><div class="stat-name">Fonti live</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--amber)" id="cntAcc">73%</div><div class="stat-name">Accuratezza</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent3)" id="cntAltaFiducia">3</div><div class="stat-name">Alta fiducia</div></div>
   </div>
-
-  <!-- HERO SEARCH -->
   <div class="hero-search">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input class="search-input" type="text" placeholder="Cerca squadra, competizione, pronostico..." id="searchInput" oninput="filterCards()">
+      <input class="search-input" id="searchInput" type="text" placeholder="Cerca squadra, competizione..." oninput="renderGrid('matchesGrid',MATCHES_TODAY)">
     </div>
-    <button class="search-btn" onclick="toggleAI()">🤖 Chiedi all'AI</button>
+    <button class="search-btn" onclick="toggleAI('aiPanelOggi')">🤖 Chiedi all'AI</button>
   </div>
-
-  <!-- AI PANEL -->
-  <div class="ai-panel" id="aiPanel">
+  <div class="ai-panel" id="aiPanelOggi">
     <div class="ai-panel-header">
       <div class="ai-avatar">🤖</div>
-      <div>
-        <div class="ai-name">PronoAI Assistant</div>
-        <div class="ai-desc">Analisi in tempo reale da 18 fonti sportive</div>
-      </div>
+      <div><div class="ai-name">PRONOapp AI</div><div class="ai-desc">Powered by Claude · web search + 20 fonti sportive</div></div>
     </div>
-    <div class="ai-messages" id="aiMessages">
-      <div class="ai-msg bot">👋 Ciao! Sono il tuo assistente per i pronostici. Puoi chiedermi analisi su qualsiasi partita di oggi, comparazione quote tra bookmaker, o consigli sulle migliori scommesse di giornata.</div>
+    <div class="ai-messages" id="aiMsgsOggi">
+      <div class="ai-msg bot">👋 Ciao! Chiedi analisi su qualsiasi partita, confronto quote o i migliori pronostici di giornata.</div>
     </div>
     <div class="ai-input-row">
-      <input class="ai-input" id="aiInput" placeholder="Es: Analizza Bologna-Roma, Qual è la miglior quota per il derby..." onkeydown="if(event.key==='Enter')sendAIMsg()">
-      <button class="ai-send" onclick="sendAIMsg()">→</button>
+      <input class="ai-input" id="aiInputOggi" placeholder="Es: Analizza Bologna-Roma, chi vince l'EL oggi?" onkeydown="if(event.key==='Enter')sendAI('aiInputOggi','aiMsgsOggi')">
+      <button class="ai-send" onclick="sendAI('aiInputOggi','aiMsgsOggi')">→</button>
     </div>
   </div>
-
-  <!-- FILTER BAR -->
   <div class="filter-bar">
-    <button class="filter-btn active" onclick="filterByComp('all',this)">Tutte</button>
-    <button class="filter-btn" onclick="filterByComp('UEL',this)">Europa League</button>
-    <button class="filter-btn" onclick="filterByComp('UCL',this)">Champions</button>
-    <button class="filter-btn" onclick="filterByComp('SA',this)">Serie A</button>
-    <button class="filter-btn" onclick="filterByComp('PL',this)">Premier</button>
-    <button class="filter-btn" onclick="filterByComp('BUND',this)">Bundesliga</button>
-    <button class="filter-btn" onclick="filterByComp('LIGA',this)">La Liga</button>
+    <button class="filter-btn active" onclick="filterComp('all',this)">Tutte</button>
+    <button class="filter-btn" onclick="filterComp('UEL',this)">Europa League</button>
+    <button class="filter-btn" onclick="filterComp('UCL',this)">Champions</button>
+    <button class="filter-btn" onclick="filterComp('UCNF',this)">Conference</button>
+    <button class="filter-btn" onclick="filterComp('SA',this)">Serie A</button>
+    <button class="filter-btn" onclick="filterComp('PL',this)">Premier</button>
+    <button class="filter-btn" onclick="filterComp('BUND',this)">Bundesliga</button>
+    <button class="filter-btn" onclick="filterComp('LIGA',this)">La Liga</button>
   </div>
-
-  <!-- SECTION -->
   <div class="section-header">
-    <div class="section-title">Ottavi Europa League <span class="section-count">8 partite</span></div>
-    <button class="see-all" onclick="sortByConf()">Ordina per fiducia ↕</button>
+    <div class="section-title">Pronostici del giorno <span class="section-count" id="matchCount">8 partite</span></div>
+    <button class="see-all" onclick="sortByConf()">Ordina fiducia ↕</button>
   </div>
-
-  <!-- MATCHES GRID -->
   <div class="matches-grid" id="matchesGrid"></div>
-
-  <!-- DISCLAIMER -->
-  <div class="disclaimer">
-    <strong>⚠️ Avviso:</strong> I pronostici sono elaborazioni statistiche da fonti pubbliche (SofaScore, Forebet, Sky Sport, Rai Sport, Tuttosport, DAZN, Gazzetta dello Sport, UEFA, Transfermarkt, Bet365, Betfair, SNAI, Sisal, Eurobet, GoldBet, Planetwin365, Diretta.it, TuttoMercatoWeb). Non costituiscono certezza. Il gioco d'azzardo è vietato ai minori di 18 anni e può causare dipendenza. Gioca responsabilmente.
-  </div>
-
+  <div class="disclaimer">⚠️ PRONOapp è solo a scopo informativo. Il gioco d'azzardo è vietato ai minori di 18 anni. Gioca responsabilmente.</div>
 </div>
-
-<!-- TAB DOMANI -->
-<div class="tab-content" id="tab-domani">
-  <div class="section-header" style="margin-top:8px">
-    <div class="section-title">Partite di domani</div>
+ 
+<!-- TAB COPPE EU -->
+<div class="tab-content" id="tab-coppe">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-val">3</div><div class="stat-name">Coppe europee</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent2)">UCL</div><div class="stat-name">Ottavi di ritorno</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--amber)">8</div><div class="stat-name">Pronostici oggi</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent)">20 Mag</div><div class="stat-name">Finale UEL</div></div>
   </div>
-  <div class="matches-grid" id="domaniGrid"></div>
+  <div id="coppeContent"></div>
 </div>
-
-<!-- TAB CLASSIFICA -->
-<div class="tab-content" id="tab-classifica">
-  <div class="section-header" style="margin-top:8px">
-    <div class="section-title">Classifiche live</div>
+ 
+<!-- TAB CAMPIONATI -->
+<div class="tab-content" id="tab-campionati">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent)">29ª</div><div class="stat-name">Serie A</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent2)">GW30</div><div class="stat-name">Premier League</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--amber)">26ª</div><div class="stat-name">Bundesliga</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent3)">27ª</div><div class="stat-name">La Liga / L1</div></div>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px" id="classGrid"></div>
+  <div class="section-header"><div class="section-title">🗓 Prossime partite <span class="section-count">13–16 marzo 2026</span></div></div>
+  <div id="campionatiContent"></div>
 </div>
-
-<!-- TAB ANALISI -->
+ 
+<!-- TAB GIOCATORI -->
+<div class="tab-content" id="tab-giocatori">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent)">35</div><div class="stat-name">Giocatori</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--amber)">15</div><div class="stat-name">Nazioni</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent2)">14</div><div class="stat-name">Club</div></div>
+  </div>
+  <div class="player-filter" id="playerFilter">
+    <button class="filter-btn active" onclick="filterPlayers('all',this)">Tutti</button>
+    <button class="filter-btn" onclick="filterPlayers('ATT',this)">⚽ ATT</button>
+    <button class="filter-btn" onclick="filterPlayers('CEN',this)">🔵 CEN</button>
+    <button class="filter-btn" onclick="filterPlayers('DIF',this)">🛡 DIF</button>
+    <button class="filter-btn" onclick="filterPlayers('POR',this)">🧤 POR</button>
+  </div>
+  <div class="player-grid" id="playerGrid"></div>
+</div>
+ 
+<!-- TAB CLASSIFICHE -->
+<div class="tab-content" id="tab-classifiche">
+  <div class="section-header">
+    <div class="section-title">Classifiche Europee</div>
+    <span class="class-date" id="classDate"></span>
+  </div>
+  <div class="class-grid" id="classGrid"></div>
+</div>
+ 
+<!-- TAB ANALISI AI -->
 <div class="tab-content" id="tab-analisi">
-  <div class="section-header" style="margin-top:8px">
-    <div class="section-title">Analisi approfondite AI</div>
-  </div>
   <div id="analisiContent"></div>
 </div>
-
+ 
 <!-- TAB FONTI -->
 <div class="tab-content" id="tab-fonti">
-  <div class="section-header" style="margin-top:8px">
-    <div class="section-title">Fonti & Bookmaker</div>
-  </div>
   <div id="fontiContent"></div>
 </div>
-
+ 
+<!-- TAB DATA SCIENCE -->
+<div class="tab-content" id="tab-datascience">
+  <div id="dsContent"></div>
+</div>
+ 
 </main>
-
+ 
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal" id="modalBox">
+  <div class="modal">
     <div class="modal-header">
-      <div class="modal-title" id="modalTitle">Dettaglio partita</div>
+      <div class="modal-title" id="modalTitle">—</div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body" id="modalBody"></div>
   </div>
 </div>
-
+ 
 <script>
-const MATCHES = [
-  {
-    id:1, comp:'UEL', compLabel:'Europa League', slot:'18:45',
-    home:'Bologna', away:'Roma', flag:'🇮🇹🇮🇹',
-    prob1:30, probX:32, prob2:38,
-    prono:'X — 1-1', quota:'2.10',
-    conf:68, tags:['Derby 🇮🇹','Under 2.5','Equilibrio'],
-    tagTypes:['tag-amber','tag-blue','tag-gray'],
-    info:'Primo derby europeo tra le due squadre. Bologna in forma con 5 vittorie consecutive. Roma più esperta in Europa.',
-    sources:[
-      {n:'SofaScore',r:'X',c:'Alta',a:'agree'},{n:'Forebet',r:'X',c:'Media',a:'agree'},
-      {n:'Sky Sport',r:'1-1',c:'Alta',a:'agree'},{n:'Gazzetta',r:'2-1 Roma',c:'Media',a:'diff'},
-      {n:'Tuttosport',r:'1-1',c:'Media',a:'agree'},{n:'Rai Sport',r:'X',c:'Bassa',a:'partial'},
-      {n:'SNAI',r:'X q2.10',c:'—',a:'agree'},{n:'Sisal',r:'X q2.05',c:'—',a:'agree'},
-      {n:'Bet365',r:'X q2.10',c:'—',a:'agree'},{n:'Betfair',r:'X 2.12',c:'—',a:'agree'},
-    ]
-  },
-  {
-    id:2, comp:'UEL', compLabel:'Europa League', slot:'18:45',
-    home:'Lille', away:'Aston Villa', flag:'🇫🇷🏴󠁧󠁢󠁥󠁮󠁧󠁿',
-    prob1:33, probX:28, prob2:39,
-    prono:'2 — 1-2', quota:'2.40',
-    conf:72, tags:['Emery fav.','GG','Coppa storica'],
-    tagTypes:['tag-green','tag-green','tag-gray'],
-    info:'Emery ha vinto l\'EL per 4 volte. Aston Villa favorito dalle quote. Lille solido in casa ma Villa in grande forma.',
-    sources:[
-      {n:'SofaScore',r:'2',c:'Alta',a:'agree'},{n:'Forebet',r:'2',c:'Alta',a:'agree'},
-      {n:'Sky Sport',r:'1-2',c:'Alta',a:'agree'},{n:'DAZN',r:'2',c:'Media',a:'agree'},
-      {n:'Gazzetta',r:'1-1',c:'Bassa',a:'diff'},{n:'UEFA.com',r:'2 fav',c:'Alta',a:'agree'},
-      {n:'Bet365',r:'2 q2.40',c:'—',a:'agree'},{n:'Betfair',r:'2 2.42',c:'—',a:'agree'},
-      {n:'GoldBet',r:'2 q2.38',c:'—',a:'agree'},{n:'Sisal',r:'GG q1.75',c:'—',a:'partial'},
-    ]
-  },
-  {
-    id:3, comp:'UEL', compLabel:'Europa League', slot:'18:45',
-    home:'Stoccarda', away:'Porto', flag:'🇩🇪🇵🇹',
-    prob1:43, probX:27, prob2:30,
-    prono:'1 — 2-1', quota:'2.10',
-    conf:65, tags:['GG','Under 3.5','In equilibrio'],
-    tagTypes:['tag-green','tag-blue','tag-gray'],
-    info:'Stoccarda favorito in casa. Porto forte nelle trasferte europee. Attesa partita combattuta con gol su entrambi i fronti.',
-    sources:[
-      {n:'Forebet',r:'1',c:'Media',a:'agree'},{n:'SofaScore',r:'GG',c:'Media',a:'partial'},
-      {n:'Sky Sport',r:'1-1',c:'Bassa',a:'diff'},{n:'Transfermarkt',r:'Valore uguale',c:'—',a:'partial'},
-      {n:'SNAI',r:'1 q2.10',c:'—',a:'agree'},{n:'Eurobet',r:'GG q1.57',c:'—',a:'partial'},
-      {n:'Planetwin',r:'1 q2.12',c:'—',a:'agree'},{n:'Betfair',r:'1 2.14',c:'—',a:'agree'},
-    ]
-  },
-  {
-    id:4, comp:'UEL', compLabel:'Europa League', slot:'18:45',
-    home:'Panathinaikos', away:'Betis Siviglia', flag:'🇬🇷🇪🇸',
-    prob1:30, probX:27, prob2:43,
-    prono:'2 — 0-1', quota:'2.05',
-    conf:74, tags:['Betis fav.','Under 2.5','1 su 18 vs Spagna'],
-    tagTypes:['tag-green','tag-blue','tag-red'],
-    info:'Panathinaikos ha solo 1 vittoria nelle ultime 18 sfide contro squadre spagnole. Betis partita favorita.',
-    sources:[
-      {n:'SofaScore',r:'2',c:'Alta',a:'agree'},{n:'Forebet',r:'2',c:'Alta',a:'agree'},
-      {n:'Sky Sport',r:'0-1',c:'Alta',a:'agree'},{n:'UEFA.com',r:'Betis fav',c:'Alta',a:'agree'},
-      {n:'Sisal',r:'2 q2.05',c:'—',a:'agree'},{n:'SNAI',r:'2 q2.00',c:'—',a:'agree'},
-      {n:'Bet365',r:'2 q2.05',c:'—',a:'agree'},{n:'Betfair',r:'2 2.06',c:'—',a:'agree'},
-    ]
-  },
-  {
-    id:5, comp:'UEL', compLabel:'Europa League', slot:'21:00',
-    home:'Nottingham Forest', away:'Midtjylland', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿🇩🇰',
-    prob1:52, probX:23, prob2:25,
-    prono:'1 — 2-1', quota:'1.75',
-    conf:79, tags:['Forest favorito','Over 2.5','Netto vantaggio'],
-    tagTypes:['tag-green','tag-amber','tag-green'],
-    info:'Forest nettamente favorito. Midtjylland ha sovraperformato gli xG nella fase a gironi: segnale di regressione attesa.',
-    sources:[
-      {n:'SofaScore',r:'1',c:'Alta',a:'agree'},{n:'Forebet',r:'1',c:'Alta',a:'agree'},
-      {n:'Sky Sport',r:'2-1',c:'Alta',a:'agree'},{n:'DAZN',r:'1',c:'Alta',a:'agree'},
-      {n:'Tuttosport',r:'1',c:'Media',a:'agree'},{n:'Bet365',r:'1 q1.75',c:'—',a:'agree'},
-      {n:'Betfair',r:'1 1.76',c:'—',a:'agree'},{n:'GoldBet',r:'1 q1.72',c:'—',a:'agree'},
-    ]
-  },
-  {
-    id:6, comp:'UEL', compLabel:'Europa League', slot:'21:00',
-    home:'Celta Vigo', away:'Lione', flag:'🇪🇸🇫🇷',
-    prob1:38, probX:30, prob2:32,
-    prono:'1X — 1-0', quota:'1.45',
-    conf:63, tags:['Equilibrio','Zaragoza chiave','GG possibile'],
-    tagTypes:['tag-gray','tag-amber','tag-blue'],
-    info:'Lione domina il possesso (61.2% nella fase a gironi). Celta dipende molto da Zaragoza. Match equilibrato.',
-    sources:[
-      {n:'SofaScore',r:'1X',c:'Media',a:'agree'},{n:'Forebet',r:'1',c:'Bassa',a:'partial'},
-      {n:'Sky Sport',r:'1-0',c:'Media',a:'agree'},{n:'Rai Sport',r:'X',c:'Bassa',a:'diff'},
-      {n:'Eurobet',r:'1X q1.45',c:'—',a:'agree'},{n:'Sisal',r:'GG q1.72',c:'—',a:'partial'},
-      {n:'Planetwin',r:'1 q1.95',c:'—',a:'partial'},{n:'DAZN',r:'1',c:'Media',a:'agree'},
-    ]
-  },
-  {
-    id:7, comp:'UEL', compLabel:'Europa League', slot:'21:00',
-    home:'Genk', away:'Friburgo', flag:'🇧🇪🇩🇪',
-    prob1:34, probX:29, prob2:37,
-    prono:'2 — 0-1', quota:'2.10',
-    conf:61, tags:['Friburgo fav.','GG','17 gol Genk EL'],
-    tagTypes:['tag-green','tag-green','tag-blue'],
-    info:'Genk ha segnato 17 gol in 10 partite di EL. Friburgo difensivamente solido, leggermente favorito.',
-    sources:[
-      {n:'Forebet',r:'2',c:'Media',a:'agree'},{n:'SofaScore',r:'2',c:'Bassa',a:'agree'},
-      {n:'Sky Sport',r:'0-1',c:'Media',a:'agree'},{n:'Transfermarkt',r:'Frib +valore',c:'—',a:'agree'},
-      {n:'SNAI',r:'2 q2.10',c:'—',a:'agree'},{n:'Bet365',r:'2 q2.08',c:'—',a:'agree'},
-      {n:'Betfair',r:'2 2.12',c:'—',a:'agree'},{n:'GoldBet',r:'2 q2.05',c:'—',a:'agree'},
-    ]
-  },
-  {
-    id:8, comp:'UEL', compLabel:'Europa League', slot:'21:00',
-    home:'Ferencváros', away:'Sporting Braga', flag:'🇭🇺🇵🇹',
-    prob1:32, probX:26, prob2:42,
-    prono:'2 — 0-1', quota:'2.15',
-    conf:71, tags:['Braga fav.','Under 2.5','Difesa Braga 🔒'],
-    tagTypes:['tag-green','tag-blue','tag-green'],
-    info:'Braga ha subito solo 2 gol in 7 trasferte europee stagionali. Porto inviolata in 5 occasioni.',
-    sources:[
-      {n:'SofaScore',r:'2',c:'Alta',a:'agree'},{n:'Forebet',r:'2',c:'Alta',a:'agree'},
-      {n:'Sky Sport',r:'0-1',c:'Alta',a:'agree'},{n:'UEFA.com',r:'Braga fav',c:'Alta',a:'agree'},
-      {n:'Sisal',r:'2 q2.15',c:'—',a:'agree'},{n:'SNAI',r:'2 q2.12',c:'—',a:'agree'},
-      {n:'Betfair',r:'2 2.18',c:'—',a:'agree'},{n:'Eurobet',r:'Under q1.90',c:'—',a:'partial'},
-    ]
-  }
-];
-
-const DOMANI_MATCHES = [
-  {id:10,comp:'SA',compLabel:'Serie A',slot:'20:45',home:'Inter',away:'Milan',flag:'🇮🇹',prob1:45,probX:28,prob2:27,prono:'1 — 2-0',quota:'2.00',conf:70,tags:['Derby Milano','Quota 2.00'],tagTypes:['tag-amber','tag-blue'],info:'Derby di Milano. Inter in testa alla classifica, Milan in recupero.',sources:[]},
-  {id:11,comp:'PL',compLabel:'Premier League',slot:'16:30',home:'Liverpool',away:'Tottenham',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',prob1:72,probX:16,prob2:12,prono:'1 — 2-0',quota:'1.55',conf:82,tags:['Liverpool dominante'],tagTypes:['tag-green'],info:'Liverpool grande favorito ad Anfield.',sources:[]},
-  {id:12,comp:'BUND',compLabel:'Bundesliga',slot:'18:30',home:'Bayern Munich',away:'Dortmund',away2:'Dortmund',flag:'🇩🇪',prob1:55,probX:25,prob2:20,prono:'1 — 3-1',quota:'1.70',conf:75,tags:['Bayern fav.','Over 2.5'],tagTypes:['tag-green','tag-amber'],info:'Klassiker di Bundesliga.',sources:[]},
-];
-
-const FONTI = [
-  {icon:'📊',name:'SofaScore',cat:'Statistiche',url:'#',desc:'Statistiche avanzate, xG, heat map, pagelle in tempo reale'},
-  {icon:'⚡',name:'Forebet',cat:'Pronostici AI',url:'#',desc:'Algoritmi matematici, oltre 850 campionati analizzati'},
-  {icon:'📺',name:'Sky Sport',cat:'Media/TV',url:'#',desc:'Notizie, analisi, probabili formazioni, esperti TV'},
-  {icon:'📺',name:'Rai Sport',cat:'Media/TV',url:'#',desc:'Copertura nazionale, analisi pre/post partita'},
-  {icon:'📰',name:'Gazzetta dello Sport',cat:'Giornale',url:'#',desc:'La rosea, notizie e analisi tattiche quotidiane'},
-  {icon:'📰',name:'Tuttosport',cat:'Giornale',url:'#',desc:'Calcio italiano e internazionale, mercato'},
-  {icon:'🎬',name:'DAZN',cat:'Streaming',url:'#',desc:'Dirette, highlights, analisi esperto'},
-  {icon:'🌐',name:'UEFA.com',cat:'Ufficiale',url:'#',desc:'Dati ufficiali UEFA, statistiche verificate'},
-  {icon:'💰',name:'Bet365',cat:'Bookmaker ADM',url:'#',desc:'Leader scommesse live e pre-partita'},
-  {icon:'💰',name:'Betfair',cat:'Exchange ADM',url:'#',desc:'Betting exchange, quote di mercato reale'},
-  {icon:'💰',name:'SNAI',cat:'Bookmaker ADM',url:'#',desc:'Leader calcio italiano, app completa'},
-  {icon:'💰',name:'Sisal',cat:'Bookmaker ADM',url:'#',desc:'Streaming di alta qualità, ottima UX'},
-  {icon:'💰',name:'Eurobet',cat:'Bookmaker ADM',url:'#',desc:'Promozioni, ampio palinsesto'},
-  {icon:'💰',name:'GoldBet',cat:'Bookmaker ADM',url:'#',desc:'Ampia scelta sport e mercati'},
-  {icon:'💰',name:'Planetwin365',cat:'Bookmaker ADM',url:'#',desc:'Eccellente payout e mercati'},
-  {icon:'📈',name:'Diretta.it/Flashscore',cat:'Risultati live',url:'#',desc:'Risultati in tempo reale imbattibili'},
-  {icon:'📈',name:'Transfermarkt',cat:'Statistiche',url:'#',desc:'Valori di mercato, statistiche giocatori'},
-  {icon:'📰',name:'TuttoMercatoWeb',cat:'Notizie',url:'#',desc:'Calciomercato, notizie in tempo reale'},
-];
-
-const AI_RESPONSES = {
-  'bologna': '🔍 **Bologna–Roma (18:45)**: Il Bologna arriva da 5 vittorie consecutive, solo 1 gol subito. Gli xG della fase a gironi erano 2.18/partita. La Roma, però, ha più esperienza nelle fasi ad eliminazione diretta. **Pronostico: X (pareggio) q2.10** — 8 fonti su 10 concordano. Consiglio: punta su Under 2.5 a q1.75.',
-  'roma': '🔍 **Roma** — La squadra di Gasperini ha terminato la League Phase all\'ultimo posto utile per la qualificazione diretta. In Europa sa soffrire e ripartire. **Quota vittoria diretta: 2.35, X: 2.10**. Analisi SofaScore: difesa da rivedere.',
-  'villa': '🔍 **Aston Villa** — Emery ha vinto l\'EL per 4 volte. Villa favorito vs Lille (q2.40). Il recente ko con Chelsea (1-4) pesa, ma in Europa il tecnico spagnolo sa sempre alzare il livello. Consiglio: **2 con "Home No Bet" q1.57**.',
-  'nottingham': '🔍 **Nottingham Forest** — Netto favorito con 52% di probabilità. Midtjylland ha sovraperformato gli xG nella fase a gironi (+0.5 gol/partita sopra aspettative): probabile regressione. **Forest 1 q1.75** — Alta fiducia (79%). Ottimo valore.',
-  'braga': '🔍 **Sporting Braga** — Solo 2 gol subiti in 7 trasferte europee stagionali. Difesa straordinaria. Ferencváros in casa è pericoloso, ma il Braga parte favorito. **2 q2.15, Under 2.5 q1.90**.',
-  'default': '⚽ Posso analizzare qualsiasi partita di oggi! Prova a chiedermi di: **Bologna-Roma, Lille-Aston Villa, Nottingham Forest, Celta Vigo, Braga, Genk-Friburgo** oppure chiedi **"migliori quote della giornata"** o **"partita più sicura oggi"**.',
+// ============================================================
+// GLOBAL STATE — must be first
+// ============================================================
+const S = {
+  liveResults: {},   // id -> {score, status, correct}
+  lastUpdate: null,
+  updating: false,
+  filterComp: 'all',
+  sortAsc: true,
+  playerFilter: 'all',
 };
-
-let currentFilter = 'all';
-let sortAsc = true;
-
-function getCompClass(comp) {
-  return {UEL:'lb-uel',UCL:'lb-ucl',SA:'lb-sa',PL:'lb-pl',BUND:'lb-bund',LIGA:'lb-liga'}[comp] || 'lb-sa';
+ 
+// ============================================================
+// DATA
+// ============================================================
+const MATCHES_TODAY = [
+  {id:1,comp:'UEL',compLabel:'Europa League',slot:'18:45',home:'Bologna',away:'Roma',prob1:30,probX:32,prob2:38,prono:'X — 1-1',quota:'2.10',conf:68,tags:['Derby 🇮🇹','Under 2.5','Equilibrio'],tagTypes:['tag-amber','tag-blue','tag-gray'],info:'Primo derby europeo tra le due. Bologna 5 vittorie consecutive. Roma esperta in Europa.',sources:[{n:'SofaScore',r:'X',a:'agree'},{n:'Forebet',r:'X',a:'agree'},{n:'Sky Sport',r:'1-1',a:'agree'},{n:'Gazzetta',r:'2-1 Roma',a:'diff'},{n:'Bet365',r:'X q2.10',a:'agree'},{n:'SNAI',r:'X q2.05',a:'agree'},{n:'Betfair',r:'X 2.12',a:'agree'},{n:'William Hill',r:'X q2.10',a:'agree'},{n:'Planetwin',r:'X q2.08',a:'agree'},{n:'Eurosport',r:'Equilibrio',a:'partial'},{n:'calcio.it',r:'Pari',a:'agree'}]},
+  {id:2,comp:'UEL',compLabel:'Europa League',slot:'18:45',home:'Lille',away:'Aston Villa',prob1:33,probX:28,prob2:39,prono:'2 — 1-2',quota:'2.40',conf:72,tags:['Emery 4xUEL','GG','Villa fav'],tagTypes:['tag-green','tag-green','tag-gray'],info:'Emery ha vinto l\'EL 4 volte. Villa favorito dalle quote internazionali.',sources:[{n:'SofaScore',r:'2',a:'agree'},{n:'Forebet',r:'2',a:'agree'},{n:'Sky Sport',r:'1-2',a:'agree'},{n:'UEFA.com',r:'2 fav',a:'agree'},{n:'Bet365',r:'2 q2.40',a:'agree'},{n:'SNAI',r:'2 q2.38',a:'agree'},{n:'William Hill',r:'2 q2.35',a:'agree'},{n:'Betfair',r:'2 2.45',a:'agree'},{n:'Eurosport',r:'Villa fav',a:'agree'},{n:'Forza Football',r:'Villa',a:'agree'}]},
+  {id:3,comp:'UEL',compLabel:'Europa League',slot:'18:45',home:'Stoccarda',away:'Porto',prob1:43,probX:27,prob2:30,prono:'1 — 2-1',quota:'2.10',conf:65,tags:['GG','Equilibrio'],tagTypes:['tag-green','tag-gray'],info:'Stoccarda favorito in casa. Porto forte in trasferta europea.',sources:[{n:'Forebet',r:'1',a:'agree'},{n:'SofaScore',r:'GG',a:'partial'},{n:'SNAI',r:'1 q2.10',a:'agree'},{n:'Planetwin',r:'1 q2.12',a:'agree'},{n:'William Hill',r:'1 q2.05',a:'agree'},{n:'Betwin',r:'1 q2.08',a:'agree'}]},
+  {id:4,comp:'UEL',compLabel:'Europa League',slot:'18:45',home:'Panathinaikos',away:'Betis',prob1:30,probX:27,prob2:43,prono:'2 — 0-1',quota:'2.05',conf:74,tags:['Betis fav','Under 2.5'],tagTypes:['tag-green','tag-blue'],info:'Panathinaikos 1 vittoria su 18 vs squadre spagnole. Betis nettamente favorito.',sources:[{n:'SofaScore',r:'2',a:'agree'},{n:'Forebet',r:'2',a:'agree'},{n:'Bet365',r:'2 q2.05',a:'agree'},{n:'SNAI',r:'2 q2.00',a:'agree'},{n:'Betfair',r:'2 2.10',a:'agree'},{n:'sport.it',r:'Betis',a:'agree'}]},
+  {id:5,comp:'UEL',compLabel:'Europa League',slot:'21:00',home:'Nottingham',away:'Midtjylland',prob1:52,probX:23,prob2:25,prono:'1 — 2-1',quota:'1.75',conf:79,tags:['Forest fav','Over 2.5'],tagTypes:['tag-green','tag-amber'],info:'Nottingham Forest grande favorito in casa. Midtjylland ha sovraperformato xG in trasferta.',sources:[{n:'SofaScore',r:'1',a:'agree'},{n:'Forebet',r:'1',a:'agree'},{n:'Bet365',r:'1 q1.75',a:'agree'},{n:'William Hill',r:'1 q1.72',a:'agree'},{n:'SNAI',r:'1 q1.70',a:'agree'},{n:'Betfair',r:'1 1.78',a:'agree'},{n:'Eurosport',r:'Forest fav',a:'agree'},{n:'Forza Football',r:'1',a:'agree'},{n:'Google',r:'1 favorito',a:'agree'}]},
+  {id:6,comp:'UEL',compLabel:'Europa League',slot:'21:00',home:'Celta Vigo',away:'Lione',prob1:38,probX:30,prob2:32,prono:'1X — 1-0',quota:'1.45',conf:63,tags:['Equilibrio','Iago Aspas key'],tagTypes:['tag-gray','tag-amber'],info:'Lione domina possesso (61%). Celta dipende da Aspas. Partita equilibrata.',sources:[{n:'SofaScore',r:'1X',a:'agree'},{n:'Forebet',r:'1',a:'partial'},{n:'Planetwin',r:'1X q1.45',a:'agree'},{n:'Betwin',r:'1X q1.42',a:'agree'}]},
+  {id:7,comp:'UEL',compLabel:'Europa League',slot:'21:00',home:'Genk',away:'Friburgo',prob1:34,probX:29,prob2:37,prono:'2 — 0-1',quota:'2.10',conf:61,tags:['Friburgo fav','GG'],tagTypes:['tag-green','tag-green'],info:'Genk ha segnato 17 gol in EL. Friburgo difensivamente molto solido.',sources:[{n:'Forebet',r:'2',a:'agree'},{n:'SNAI',r:'2 q2.10',a:'agree'},{n:'Betfair',r:'2 2.12',a:'agree'},{n:'William Hill',r:'2 q2.08',a:'agree'}]},
+  {id:8,comp:'UEL',compLabel:'Europa League',slot:'21:00',home:'Ferencváros',away:'Braga',prob1:32,probX:26,prob2:42,prono:'2 — 0-1',quota:'2.15',conf:71,tags:['Braga fav','Difesa 🔒'],tagTypes:['tag-green','tag-green'],info:'Braga: solo 2 gol subiti in 7 trasferte europee questa stagione.',sources:[{n:'SofaScore',r:'2',a:'agree'},{n:'Forebet',r:'2',a:'agree'},{n:'Sisal',r:'2 q2.15',a:'agree'},{n:'SNAI',r:'2 q2.12',a:'agree'},{n:'Bet365',r:'2 q2.20',a:'agree'},{n:'Betfair',r:'2 2.18',a:'agree'}]},
+];
+ 
+const MATCHES_CAMP = [
+  // ── SERIE A 29ª GIORNATA (13-16 marzo 2026) ──
+  {id:20,comp:'SA',compLabel:'Serie A',slot:'Ven 20:45',home:'Torino',away:'Parma',prob1:44,probX:30,prob2:26,prono:'1X — 1-0',quota:'2.10',conf:66,
+   tags:['Torino in forma','Parma crisi','Under 2.5'],tagTypes:['tag-green','tag-amber','tag-blue'],
+   info:'Torino in ripresa con 3 risultati utili consecutivi, Parma penultima con soli 33 punti. Granata favoriti in casa.',
+   sources:[{n:'SofaScore',r:'1',a:'agree'},{n:'Forebet',r:'1',a:'agree'},{n:'Sky Sport',r:'1',a:'agree'},{n:'SNAI',r:'1 q2.10',a:'agree'},{n:'Bet365',r:'1 q2.05',a:'agree'}]},
+  {id:21,comp:'SA',compLabel:'Serie A',slot:'Sab 15:00',home:'Inter',away:'Atalanta',prob1:48,probX:26,prob2:26,prono:'1 — 2-1',quota:'2.05',conf:67,
+   tags:['Inter capolista','Atalanta UCL','Scontro diretto'],tagTypes:['tag-green','tag-amber','tag-amber'],
+   info:'Inter capolista a 67 punti, Atalanta a 46. Nerazzurri favoriti ma Atalanta è reduce da EL ottavi. Partita intensa.',
+   sources:[{n:'Sky Sport',r:'1',a:'agree'},{n:'Gazzetta',r:'X',a:'diff'},{n:'SofaScore',r:'1',a:'agree'},{n:'Bet365',r:'1 q2.05',a:'agree'},{n:'Tuttosport',r:'1',a:'agree'}]},
+  {id:22,comp:'SA',compLabel:'Serie A',slot:'Sab 18:00',home:'Napoli',away:'Lecce',prob1:68,probX:20,prob2:12,prono:'1 — 2-0',quota:'1.55',conf:80,
+   tags:['Napoli 3° posto','Lecce retro','Maradona fort.'],tagTypes:['tag-green','tag-amber','tag-green'],
+   info:'Napoli a 56 punti, Lecce in zona retrocessione a 24. Azzurri larghi favoriti al Maradona.',
+   sources:[{n:'SofaScore',r:'1',a:'agree'},{n:'Forebet',r:'1',a:'agree'},{n:'SNAI',r:'1 q1.55',a:'agree'},{n:'Bet365',r:'1 q1.52',a:'agree'},{n:'Sky Sport',r:'1',a:'agree'}]},
+  {id:23,comp:'SA',compLabel:'Serie A',slot:'Sab 20:45',home:'Udinese',away:'Juventus',prob1:28,probX:28,prob2:44,prono:'2 — 0-2',quota:'2.00',conf:70,
+   tags:['Juventus fav','Udinese debole','Bianconeri in ripresa'],tagTypes:['tag-green','tag-amber','tag-green'],
+   info:'Udinese 36 punti, Juventus 50 punti. Bianconeri favoriti per i 3 punti in trasferta.',
+   sources:[{n:'Sky Sport',r:'2',a:'agree'},{n:'Tuttosport',r:'2',a:'agree'},{n:'SofaScore',r:'2',a:'agree'},{n:'SNAI',r:'2 q2.00',a:'agree'},{n:'Bet365',r:'2 q1.95',a:'agree'}]},
+  {id:24,comp:'SA',compLabel:'Serie A',slot:'Dom 12:30',home:'Verona',away:'Genoa',prob1:37,probX:31,prob2:32,prono:'X — 1-1',quota:'2.95',conf:58,
+   tags:['Salvezza in palio','Entrambi in crisi','Equilibrio'],tagTypes:['tag-amber','tag-amber','tag-gray'],
+   info:'Verona 15 punti, Genoa 27. Scontro diretto salvezza. Match molto equilibrato.',
+   sources:[{n:'Forebet',r:'X',a:'agree'},{n:'SofaScore',r:'X',a:'agree'}]},
+  {id:25,comp:'SA',compLabel:'Serie A',slot:'Dom 15:00',home:'Sassuolo',away:'Bologna',prob1:25,probX:27,prob2:48,prono:'2 — 0-2',quota:'1.88',conf:73,
+   tags:['Bologna UEL','Sassuolo penultimo','Bologna fav'],tagTypes:['tag-green','tag-amber','tag-green'],
+   info:'Sassuolo penultimo a 38 punti, Bologna sesto con 39. Rossoblù reduce dall\'UEL, ampiamente favoriti.',
+   sources:[{n:'SofaScore',r:'2',a:'agree'},{n:'Gazzetta',r:'2',a:'agree'},{n:'Forebet',r:'2',a:'agree'},{n:'SNAI',r:'2 q1.88',a:'agree'}]},
+  {id:26,comp:'SA',compLabel:'Serie A',slot:'Dom 18:00',home:'Como',away:'Roma',prob1:30,probX:28,prob2:42,prono:'2 — 1-2',quota:'2.15',conf:65,
+   tags:['Roma UEL boost','Como solida','Giallorossi in ripresa'],tagTypes:['tag-green','tag-green','tag-amber'],
+   info:'Roma 51 punti, Como 51. Giallorossi reduce da UEL, entrambe a pari punti. Roma leggermente favorita.',
+   sources:[{n:'Sky Sport',r:'2',a:'agree'},{n:'Bet365',r:'2 q2.15',a:'agree'},{n:'SofaScore',r:'X',a:'diff'}]},
+  {id:27,comp:'SA',compLabel:'Serie A',slot:'Dom 20:45',home:'Lazio',away:'Milan',prob1:32,probX:28,prob2:40,prono:'2 — 1-2',quota:'2.20',conf:63,
+   tags:['Milan 2°','Scontro UCL','Lazio in forma'],tagTypes:['tag-amber','tag-amber','tag-green'],
+   info:'Milan secondo a 57 punti, Lazio a 34. Milan ha bisogno dei 3 punti nella rincorsa all\'Inter.',
+   sources:[{n:'Sky Sport',r:'2',a:'agree'},{n:'Tuttosport',r:'X',a:'diff'},{n:'Bet365',r:'X q3.05',a:'diff'}]},
+  {id:28,comp:'SA',compLabel:'Serie A',slot:'Lun 20:45',home:'Cremonese',away:'Fiorentina',prob1:24,probX:27,prob2:49,prono:'2 — 0-2',quota:'1.85',conf:74,
+   tags:['Fiorentina Conference','Cremonese retro','Viola fav'],tagTypes:['tag-green','tag-amber','tag-green'],
+   info:'Cremonese in zona retrocessione a 24 punti, Fiorentina a 24. Viola tra le migliori trasferte, Conference boost.',
+   sources:[{n:'SofaScore',r:'2',a:'agree'},{n:'Forebet',r:'2',a:'agree'},{n:'SNAI',r:'2 q1.85',a:'agree'}]},
+ 
+  // ── PREMIER LEAGUE GW30 (14-16 marzo 2026) ──
+  {id:30,comp:'PL',compLabel:'Premier League',slot:'Sab 12:00',home:'Burnley',away:'Bournemouth',prob1:35,probX:28,prob2:37,prono:'X — 1-1',quota:'3.00',conf:55,
+   tags:['Salvezza','Equilibrio','Burnley a rischio'],tagTypes:['tag-amber','tag-gray','tag-amber'],
+   info:'Entrambe in lotta nella parte bassa. Partita molto aperta.',sources:[]},
+  {id:31,comp:'PL',compLabel:'Premier League',slot:'Sab 12:00',home:'Sunderland',away:'Brighton',prob1:30,probX:27,prob2:43,prono:'2 — 0-1',quota:'2.10',conf:62,
+   tags:['Brighton fav','Sunderland metà class.','Over possibile'],tagTypes:['tag-green','tag-blue','tag-blue'],
+   info:'Brighton in ottima forma ospite. Sunderland in difficoltà.',sources:[{n:'SofaScore',r:'2',a:'agree'}]},
+  {id:32,comp:'PL',compLabel:'Premier League',slot:'Sab 14:30',home:'Chelsea',away:'Newcastle',prob1:44,probX:26,prob2:30,prono:'1 — 2-1',quota:'2.10',conf:64,
+   tags:['Chelsea fav','Over 2.5','Palmer key'],tagTypes:['tag-green','tag-amber','tag-amber'],
+   info:'Chelsea a 48 punti, Newcastle 4°. Match da gol, Blues favoriti in casa.',
+   sources:[{n:'SofaScore',r:'1',a:'agree'},{n:'Bet365',r:'1 q2.10',a:'agree'}]},
+  {id:33,comp:'PL',compLabel:'Premier League',slot:'Sab 14:30',home:'Arsenal',away:'Everton',prob1:66,probX:20,prob2:14,prono:'1 — 2-0',quota:'1.52',conf:81,
+   tags:['Arsenal 1°','Everton retro','Saka key'],tagTypes:['tag-green','tag-amber','tag-green'],
+   info:'Arsenal capolista a 67 punti, Everton in zona retrocessione. Emirates come fortezza.',
+   sources:[{n:'SofaScore',r:'1',a:'agree'},{n:'Forebet',r:'1',a:'agree'},{n:'SNAI',r:'1 q1.52',a:'agree'},{n:'Bet365',r:'1 q1.50',a:'agree'}]},
+  {id:34,comp:'PL',compLabel:'Premier League',slot:'Sab 20:00',home:'West Ham',away:'Man City',prob1:24,probX:24,prob2:52,prono:'2 — 1-3',quota:'1.80',conf:74,
+   tags:['Man City fav','De Bruyne show','West Ham 9°'],tagTypes:['tag-green','tag-green','tag-blue'],
+   info:'Man City a 60 punti, West Ham a metà classifica. Citizens nettamente favoriti in trasferta.',
+   sources:[{n:'Sky Sport',r:'2',a:'agree'},{n:'Bet365',r:'2 q1.80',a:'agree'},{n:'SofaScore',r:'2',a:'agree'}]},
+  {id:35,comp:'PL',compLabel:'Premier League',slot:'Dom 07:00',home:'Man Utd',away:'Aston Villa',prob1:38,probX:27,prob2:35,prono:'X — 1-1',quota:'3.10',conf:57,
+   tags:['Old Trafford','Equilibrio','Villa 4°'],tagTypes:['tag-amber','tag-gray','tag-amber'],
+   info:'Man Utd 51 punti, Aston Villa 51 punti. Partita pareggio probabile.',sources:[]},
+  {id:36,comp:'PL',compLabel:'Premier League',slot:'Dom 16:30',home:'Liverpool',away:'Tottenham',prob1:70,probX:18,prob2:12,prono:'1 — 2-0',quota:'1.50',conf:83,
+   tags:['Liverpool fav','Anfield fort.','Haaland ko sospetto'],tagTypes:['tag-green','tag-green','tag-amber'],
+   info:'Liverpool a 48 punti, Tottenham in difficoltà. Reds formidabili ad Anfield.',
+   sources:[{n:'SofaScore',r:'1',a:'agree'},{n:'Forebet',r:'1',a:'agree'},{n:'Bet365',r:'1 q1.50',a:'agree'},{n:'SNAI',r:'1 q1.48',a:'agree'}]},
+ 
+  // ── BUNDESLIGA 26ª GIORNATA (13-15 marzo 2026) ──
+  {id:37,comp:'BUND',compLabel:'Bundesliga',slot:'Gio 20:30',home:"M'gladbach",away:'St. Pauli',prob1:52,probX:26,prob2:22,prono:'1 — 2-0',quota:'1.85',conf:68,
+   tags:['Gladbach fav','St.Pauli salvezza'],tagTypes:['tag-green','tag-amber'],
+   info:'Borussia Mönchengladbach favorito in casa contro St. Pauli terzultimo.',sources:[]},
+  {id:38,comp:'BUND',compLabel:'Bundesliga',slot:'Sab 15:30',home:'Leverkusen',away:'Bayern Munich',prob1:32,probX:24,prob2:44,prono:'2 — 1-2',quota:'1.95',conf:67,
+   tags:['Bayern +11 Dortmund','Wirtz vs Kane','Big match'],tagTypes:['tag-amber','tag-green','tag-green'],
+   info:'Bayern capolista a 66 punti, Leverkusen a 44. Bavari favoriti al BayArena.',
+   sources:[{n:'Sky Sport',r:'2',a:'agree'},{n:'Bet365',r:'2 q1.95',a:'agree'},{n:'Forebet',r:'2',a:'agree'}]},
+  {id:39,comp:'BUND',compLabel:'Bundesliga',slot:'Sab 15:30',home:'Eintracht',away:'Heidenheim',prob1:58,probX:24,prob2:18,prono:'1 — 2-0',quota:'1.70',conf:72,
+   tags:['Eintracht fav','Heidenheim ultimo'],tagTypes:['tag-green','tag-amber'],
+   info:'Eintracht Frankfurt ampiamente favorito contro Heidenheim penultimo.',sources:[]},
+  {id:40,comp:'BUND',compLabel:'Bundesliga',slot:'Sab 15:30',home:'Dortmund',away:'Augsburg',prob1:62,probX:22,prob2:16,prono:'1 — 3-0',quota:'1.60',conf:77,
+   tags:['Dortmund 2°','Augsburg salvezza','Over 2.5'],tagTypes:['tag-green','tag-amber','tag-amber'],
+   info:'Dortmund secondo a 55 punti, Augsburg in lotta per la salvezza. Gialloneri ampiamente favoriti.',
+   sources:[{n:'Forebet',r:'1',a:'agree'},{n:'SNAI',r:'1 q1.60',a:'agree'},{n:'SofaScore',r:'1',a:'agree'}]},
+  {id:41,comp:'BUND',compLabel:'Bundesliga',slot:'Dom 17:30',home:'Stoccarda',away:'RB Lipsia',prob1:44,probX:26,prob2:30,prono:'1X — 1-1',quota:'2.20',conf:60,
+   tags:['Scontro top-4','Lipsia 47 pt','Equilibrio'],tagTypes:['tag-gray','tag-amber','tag-blue'],
+   info:'Stoccarda 47 punti, RB Lipsia 47 punti. Scontro diretto per la zona Europa, match apertissimo.',
+   sources:[{n:'Sky Sport',r:'X',a:'agree'}]},
+ 
+  // ── LA LIGA GIORNATA 27 (prossimo fine settimana) ──
+  {id:42,comp:'LIGA',compLabel:'La Liga',slot:'Sab 16:15',home:'Real Madrid',away:'Athletic Bilbao',prob1:64,probX:21,prob2:15,prono:'1 — 2-1',quota:'1.60',conf:78,
+   tags:['Real Madrid 2°','Bernabeu fort.','Mbappé key'],tagTypes:['tag-green','tag-green','tag-amber'],
+   info:'Real Madrid secondo a 63 punti, Athletic Bilbao ottavo. Madrileni fortissimi al Bernabeu.',
+   sources:[{n:'Forebet',r:'1',a:'agree'},{n:'Bet365',r:'1 q1.60',a:'agree'},{n:'SofaScore',r:'1',a:'agree'}]},
+  {id:43,comp:'LIGA',compLabel:'La Liga',slot:'Dom 14:00',home:'Barcelona',away:'Getafe',prob1:70,probX:18,prob2:12,prono:'1 — 3-0',quota:'1.40',conf:85,
+   tags:['Barca capolista 67pt','Getafe retro','Yamal-Pedri'],tagTypes:['tag-green','tag-green','tag-green'],
+   info:'Barcellona capolista a 67 punti. Getafe in zona salvezza. Blaugrana dominanti al Montjuic.',
+   sources:[{n:'SofaScore',r:'1',a:'agree'},{n:'Forebet',r:'1',a:'agree'},{n:'Bet365',r:'1 q1.40',a:'agree'}]},
+  {id:44,comp:'LIGA',compLabel:'La Liga',slot:'Dom 16:15',home:'Atletico',away:'Sevilla',prob1:55,probX:25,prob2:20,prono:'1 — 2-0',quota:'1.75',conf:74,
+   tags:['Atletico 3°','Wanda Metro.','Morata key'],tagTypes:['tag-green','tag-amber','tag-green'],
+   info:'Atletico terzo a 54 punti, Sevilla metà classifica. Simeone fortissimo in casa.',
+   sources:[{n:'Sky Sport',r:'1',a:'agree'},{n:'SNAI',r:'1 q1.75',a:'agree'}]},
+ 
+  // ── LIGUE 1 (prossimo fine settimana) ──
+  {id:45,comp:'LIGUE1',compLabel:'Ligue 1',slot:'Dom 17:00',home:'PSG',away:'Nice',prob1:72,probX:18,prob2:10,prono:'1 — 3-0',quota:'1.45',conf:86,
+   tags:['PSG capolista 57pt','Kvaratskhelia','Nice 10°'],tagTypes:['tag-green','tag-green','tag-blue'],
+   info:'PSG primo a 57 punti, Kvaratskhelia in grandissima forma (14G+16A). Nice decimo. Parc des Princes inespugnabile.',
+   sources:[{n:'SofaScore',r:'1',a:'agree'},{n:'Forebet',r:'1',a:'agree'},{n:'Bet365',r:'1 q1.45',a:'agree'},{n:'SNAI',r:'1 q1.42',a:'agree'}]},
+  {id:46,comp:'LIGUE1',compLabel:'Ligue 1',slot:'Dom 19:05',home:'Marseille',away:'RC Lens',prob1:44,probX:28,prob2:28,prono:'1X — 1-0',quota:'2.15',conf:62,
+   tags:['Marseille 3°','Lens 2°','Big match Ligue 1'],tagTypes:['tag-amber','tag-amber','tag-amber'],
+   info:'Marseille terzo a 46, Lens secondo a 56. Big match per il titolo. Scontro diretto molto equilibrato.',
+   sources:[{n:'Sky Sport',r:'X',a:'agree'},{n:'SofaScore',r:'1',a:'diff'}]},
+];
+ 
+const MATCHES_COPPE_EXTRA = [
+  {id:40,comp:'UCL',compLabel:'Champions League',slot:'21:00',home:'Real Madrid',away:'Man City',prob1:52,probX:24,prob2:24,prono:'1 — 2-1',quota:'2.05',conf:67,tags:['Ritorno ottavi','Real casa'],tagTypes:['tag-amber','tag-green'],info:'Ritorno ottavi UCL. Real avanti 3-0 all\'andata.',sources:[{n:'SofaScore',r:'1',a:'agree'},{n:'Bet365',r:'1 q2.05',a:'agree'}]},
+  {id:41,comp:'UCL',compLabel:'Champions League',slot:'21:00',home:'Arsenal',away:'Leverkusen',prob1:68,probX:18,prob2:14,prono:'1 — 2-0',quota:'1.65',conf:77,tags:['Arsenal fav 74%','Ritorno'],tagTypes:['tag-green','tag-green'],info:'Arsenal con 74% probabilità secondo i modelli.',sources:[{n:'Forebet',r:'1',a:'agree'},{n:'SNAI',r:'1 q1.65',a:'agree'}]},
+  {id:50,comp:'UCNF',compLabel:'Conference League',slot:'18:45',home:'Fiorentina',away:'Betis',prob1:44,probX:28,prob2:28,prono:'1 — 1-0',quota:'2.15',conf:64,tags:['Viola in casa','Italia-Spagna'],tagTypes:['tag-green','tag-gray'],info:'Fiorentina in casa leggero favorito.',sources:[{n:'Sky Sport',r:'1',a:'agree'},{n:'SNAI',r:'1 q2.15',a:'agree'}]},
+  {id:51,comp:'UCNF',compLabel:'Conference League',slot:'21:00',home:'Chelsea',away:'Copenhagen',prob1:65,probX:20,prob2:15,prono:'1 — 2-0',quota:'1.58',conf:74,tags:['Chelsea dom.','London fortress'],tagTypes:['tag-green','tag-green'],info:'Chelsea nettamente favorito a Stamford Bridge.',sources:[{n:'Forebet',r:'1',a:'agree'},{n:'Bet365',r:'1 q1.58',a:'agree'}]},
+];
+ 
+const PLAYERS = [
+  {id:1,name:'Erling Haaland',team:'Man City',nat:'🇳🇴',pos:'ATT',emoji:'👑',goals:28,assist:6,apps:32,val:'180M€',age:25,foot:'D',height:'194cm'},
+  {id:2,name:'Kylian Mbappé',team:'Real Madrid',nat:'🇫🇷',pos:'ATT',emoji:'⚡',goals:34,assist:12,apps:36,val:'200M€',age:27,foot:'D',height:'178cm'},
+  {id:3,name:'Vinicius Jr.',team:'Real Madrid',nat:'🇧🇷',pos:'ATT',emoji:'🌟',goals:22,assist:14,apps:34,val:'180M€',age:24,foot:'D',height:'176cm'},
+  {id:4,name:'Bukayo Saka',team:'Arsenal',nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',pos:'ATT',emoji:'🔴',goals:18,assist:16,apps:35,val:'160M€',age:23,foot:'D',height:'178cm'},
+  {id:5,name:'Lautaro Martinez',team:'Inter',nat:'🇦🇷',pos:'ATT',emoji:'⚫',goals:24,assist:8,apps:33,val:'110M€',age:27,foot:'D',height:'174cm'},
+  {id:6,name:'Dusan Vlahovic',team:'Juventus',nat:'🇷🇸',pos:'ATT',emoji:'⚪',goals:20,assist:4,apps:30,val:'70M€',age:25,foot:'D',height:'190cm'},
+  {id:7,name:'Romelu Lukaku',team:'Napoli',nat:'🇧🇪',pos:'ATT',emoji:'🔵',goals:18,assist:7,apps:29,val:'25M€',age:31,foot:'D',height:'190cm'},
+  {id:8,name:'Rafael Leão',team:'Milan',nat:'🇵🇹',pos:'ATT',emoji:'🔴',goals:16,assist:13,apps:32,val:'80M€',age:25,foot:'S',height:'187cm'},
+  {id:9,name:'Harry Kane',team:'Bayern Munich',nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',pos:'ATT',emoji:'⚽',goals:36,assist:14,apps:38,val:'100M€',age:31,foot:'D',height:'188cm'},
+  {id:10,name:'Robert Lewandowski',team:'Barcelona',nat:'🇵🇱',pos:'ATT',emoji:'🔵',goals:26,assist:9,apps:35,val:'15M€',age:36,foot:'D',height:'185cm'},
+  {id:11,name:'Jude Bellingham',team:'Real Madrid',nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',pos:'CEN',emoji:'⚪',goals:18,assist:15,apps:36,val:'180M€',age:21,foot:'D',height:'186cm'},
+  {id:12,name:'Pedri',team:'Barcelona',nat:'🇪🇸',pos:'CEN',emoji:'🔵',goals:8,assist:14,apps:30,val:'100M€',age:22,foot:'S',height:'174cm'},
+  {id:13,name:'Martin Odegaard',team:'Arsenal',nat:'🇳🇴',pos:'CEN',emoji:'🔴',goals:12,assist:18,apps:34,val:'120M€',age:26,foot:'D',height:'178cm'},
+  {id:14,name:'Nicolo Barella',team:'Inter',nat:'🇮🇹',pos:'CEN',emoji:'⚫',goals:7,assist:12,apps:33,val:'80M€',age:27,foot:'D',height:'172cm'},
+  {id:15,name:'Khvicha Kvaratskhelia',team:'PSG',nat:'🇬🇪',pos:'ATT',emoji:'🔵',goals:14,assist:16,apps:30,val:'80M€',age:23,foot:'S',height:'183cm'},
+  {id:16,name:'Florian Wirtz',team:'Leverkusen',nat:'🇩🇪',pos:'CEN',emoji:'🔴',goals:15,assist:20,apps:35,val:'130M€',age:21,foot:'D',height:'180cm'},
+  {id:17,name:'Kevin De Bruyne',team:'Man City',nat:'🇧🇪',pos:'CEN',emoji:'🔵',goals:8,assist:22,apps:28,val:'50M€',age:33,foot:'D',height:'181cm'},
+  {id:18,name:'Virgil van Dijk',team:'Liverpool',nat:'🇳🇱',pos:'DIF',emoji:'🔴',goals:4,assist:2,apps:34,val:'40M€',age:33,foot:'D',height:'193cm'},
+  {id:19,name:'Rúben Dias',team:'Man City',nat:'🇵🇹',pos:'DIF',emoji:'🔵',goals:3,assist:1,apps:32,val:'80M€',age:27,foot:'D',height:'187cm'},
+  {id:20,name:'William Saliba',team:'Arsenal',nat:'🇫🇷',pos:'DIF',emoji:'🔴',goals:2,assist:3,apps:36,val:'100M€',age:23,foot:'D',height:'192cm'},
+  {id:21,name:'Alessandro Bastoni',team:'Inter',nat:'🇮🇹',pos:'DIF',emoji:'⚫',goals:3,assist:6,apps:33,val:'80M€',age:25,foot:'S',height:'191cm'},
+  {id:22,name:'Theo Hernández',team:'Milan',nat:'🇫🇷',pos:'DIF',emoji:'🔴',goals:6,assist:9,apps:32,val:'60M€',age:27,foot:'S',height:'184cm'},
+  {id:23,name:'Alisson Becker',team:'Liverpool',nat:'🇧🇷',pos:'POR',emoji:'🔴',goals:0,assist:0,apps:34,val:'40M€',age:32,foot:'D',height:'193cm'},
+  {id:24,name:'Marc-André ter Stegen',team:'Barcelona',nat:'🇩🇪',pos:'POR',emoji:'🔵',goals:0,assist:0,apps:30,val:'25M€',age:32,foot:'S',height:'187cm'},
+  {id:25,name:'Gianluigi Donnarumma',team:'PSG',nat:'🇮🇹',pos:'POR',emoji:'🔵',goals:0,assist:0,apps:33,val:'60M€',age:26,foot:'S',height:'196cm'},
+  {id:26,name:'Thibaut Courtois',team:'Real Madrid',nat:'🇧🇪',pos:'POR',emoji:'⚪',goals:0,assist:0,apps:30,val:'40M€',age:32,foot:'D',height:'199cm'},
+  {id:27,name:'Yann Sommer',team:'Inter',nat:'🇨🇭',pos:'POR',emoji:'⚫',goals:0,assist:0,apps:33,val:'12M€',age:36,foot:'D',height:'183cm'},
+  {id:28,name:'Phil Foden',team:'Man City',nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',pos:'ATT',emoji:'🔵',goals:19,assist:13,apps:33,val:'150M€',age:24,foot:'S',height:'171cm'},
+  {id:29,name:'Cole Palmer',team:'Chelsea',nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',pos:'ATT',emoji:'🔵',goals:23,assist:18,apps:36,val:'100M€',age:22,foot:'D',height:'185cm'},
+  {id:30,name:'Alejandro Garnacho',team:'Man Utd',nat:'🇦🇷',pos:'ATT',emoji:'🔴',goals:14,assist:9,apps:34,val:'60M€',age:20,foot:'S',height:'180cm'},
+  {id:31,name:'Jamal Musiala',team:'Bayern Munich',nat:'🇩🇪',pos:'ATT',emoji:'⚽',goals:20,assist:16,apps:36,val:'150M€',age:21,foot:'D',height:'180cm'},
+  {id:32,name:'Davide Frattesi',team:'Inter',nat:'🇮🇹',pos:'CEN',emoji:'⚫',goals:10,assist:7,apps:35,val:'45M€',age:25,foot:'D',height:'175cm'},
+  {id:33,name:'Riccardo Calafiori',team:'Arsenal',nat:'🇮🇹',pos:'DIF',emoji:'🔴',goals:3,assist:4,apps:28,val:'60M€',age:22,foot:'S',height:'187cm'},
+  {id:34,name:'Rodri',team:'Man City',nat:'🇪🇸',pos:'CEN',emoji:'🔵',goals:5,assist:8,apps:30,val:'130M€',age:28,foot:'D',height:'191cm'},
+  {id:35,name:'Lamine Yamal',team:'Barcelona',nat:'🇪🇸',pos:'ATT',emoji:'⭐',goals:17,assist:19,apps:34,val:'200M€',age:17,foot:'D',height:'180cm'},
+];
+ 
+const CLASSIFICHE = [
+  {name:'Serie A',badge:'lb-sa',updated:'12 Mar 2026 — 28ª giornata',rows:[
+    {t:'Inter',g:28,v:21,p:4,s:3,gf:62,gs:28,pts:67,form:'VVVSV'},
+    {t:'Milan',g:28,v:18,p:3,s:7,gf:50,gs:32,pts:57,form:'VPVVV'},
+    {t:'Napoli',g:28,v:17,p:5,s:6,gf:43,gs:31,pts:56,form:'PVVVV'},
+    {t:'Roma',g:28,v:15,p:6,s:7,gf:51,gs:41,pts:51,form:'VSVPV'},
+    {t:'Como',g:29,v:15,p:6,s:8,gf:50,gs:44,pts:51,form:'VVVPV'},
+    {t:'Juventus',g:29,v:15,p:5,s:9,gf:48,gs:38,pts:50,form:'VVPVV'},
+    {t:'Atalanta',g:29,v:13,p:7,s:9,gf:55,gs:41,pts:46,form:'PVPSV'},
+    {t:'Bologna',g:28,v:11,p:6,s:11,gf:38,gs:44,pts:39,form:'SSVPV'},
+    {t:'Sassuolo',g:28,v:10,p:8,s:10,gf:39,gs:42,pts:38,form:'PVVSV'},
+    {t:'Udinese',g:29,v:10,p:6,s:13,gf:38,gs:48,pts:36,form:'PSSVP'},
+    {t:'Lazio',g:27,v:9,p:7,s:11,gf:34,gs:40,pts:34,form:'SVVPS'},
+    {t:'Parma',g:28,v:9,p:6,s:13,gf:35,gs:48,pts:33,form:'PVSSV'},
+    {t:'Cagliari',g:29,v:8,p:6,s:15,gf:36,gs:52,pts:30,form:'SVPSS'},
+    {t:'Torino',g:29,v:8,p:6,s:15,gf:30,gs:44,pts:30,form:'SSSVP'},
+    {t:'Genoa',g:28,v:7,p:6,s:15,gf:32,gs:50,pts:27,form:'SVVSS'},
+    {t:'Fiorentina',g:28,v:6,p:6,s:16,gf:28,gs:48,pts:24,form:'PSPSS'},
+    {t:'Cremonese',g:28,v:6,p:6,s:16,gf:26,gs:50,pts:24,form:'SSSVS'},
+    {t:'Lecce',g:28,v:6,p:6,s:16,gf:30,gs:52,pts:24,form:'VSSSS'},
+    {t:'Pisa',g:29,v:3,p:6,s:20,gf:22,gs:58,pts:15,form:'SSSSS'},
+    {t:'Hellas Verona',g:28,v:3,p:6,s:19,gf:28,gs:56,pts:15,form:'VSSSP'},
+  ]},
+  {name:'Premier League',badge:'lb-pl',updated:'12 Mar 2026 — GW29',rows:[
+    {t:'Arsenal',g:30,v:20,p:7,s:3,gf:64,gs:30,pts:67,form:'VVVPV'},
+    {t:'Man City',g:29,v:18,p:6,s:5,gf:60,gs:34,pts:60,form:'VPVVP'},
+    {t:'Man Utd',g:29,v:14,p:9,s:6,gf:48,gs:36,pts:51,form:'PVVVP'},
+    {t:'Aston Villa',g:29,v:15,p:6,s:8,gf:52,gs:40,pts:51,form:'VVVPS'},
+    {t:'Chelsea',g:29,v:13,p:9,s:7,gf:50,gs:38,pts:48,form:'PVVPV'},
+    {t:'Liverpool',g:29,v:14,p:6,s:9,gf:52,gs:40,pts:48,form:'SVVPV'},
+    {t:'Brentford',g:29,v:13,p:5,s:11,gf:48,gs:44,pts:44,form:'VVSPV'},
+    {t:'Everton',g:29,v:12,p:7,s:10,gf:42,gs:40,pts:43,form:'PVVPS'},
+    {t:'Bournemouth',g:29,v:9,p:13,s:7,gf:40,gs:34,pts:40,form:'PPVVP'},
+    {t:'Fulham',g:29,v:12,p:4,s:13,gf:44,gs:50,pts:40,form:'VSSPV'},
+    {t:'Sunderland',g:29,v:10,p:10,s:9,gf:38,gs:36,pts:40,form:'PVVPS'},
+    {t:'Newcastle',g:29,v:11,p:6,s:12,gf:42,gs:46,pts:39,form:'SVVPV'},
+    {t:'Crystal Palace',g:29,v:10,p:8,s:11,gf:36,gs:40,pts:38,form:'VPVSS'},
+    {t:'Brighton',g:29,v:9,p:10,s:10,gf:38,gs:38,pts:37,form:'PPVVP'},
+    {t:'Leeds Utd',g:29,v:7,p:10,s:12,gf:34,gs:44,pts:31,form:'PSPVS'},
+    {t:'Tottenham',g:29,v:7,p:8,s:14,gf:32,gs:52,pts:29,form:'SSVVS'},
+    {t:'Nottm Forest',g:29,v:7,p:7,s:15,gf:30,gs:50,pts:28,form:'SSSVP'},
+    {t:'West Ham',g:29,v:7,p:7,s:15,gf:30,gs:52,pts:28,form:'PVVSS'},
+    {t:'Burnley',g:29,v:4,p:7,s:18,gf:24,gs:60,pts:19,form:'SSSPS'},
+    {t:'Wolves',g:29,v:3,p:7,s:19,gf:22,gs:62,pts:16,form:'SSSSP'},
+  ]},
+  {name:'Bundesliga',badge:'lb-bund',updated:'12 Mar 2026 — 25ª',rows:[
+    {t:'Bayern Munich',g:25,v:21,p:3,s:1,gf:75,gs:20,pts:66,form:'VVVVV'},
+    {t:'Dortmund',g:25,v:16,p:7,s:2,gf:58,gs:28,pts:55,form:'VPVVV'},
+    {t:'Hoffenheim',g:25,v:15,p:4,s:6,gf:50,gs:34,pts:49,form:'VVPVS'},
+    {t:'Stuttgart',g:25,v:14,p:5,s:6,gf:48,gs:32,pts:47,form:'PVVVP'},
+    {t:'RB Lipsia',g:25,v:14,p:5,s:6,gf:46,gs:30,pts:47,form:'VVPVS'},
+    {t:'Leverkusen',g:25,v:13,p:5,s:7,gf:46,gs:34,pts:44,form:'PVVPS'},
+    {t:'Eintracht',g:25,v:9,p:8,s:8,gf:38,gs:36,pts:35,form:'PVPVS'},
+    {t:'Friburgo',g:25,v:9,p:7,s:9,gf:36,gs:38,pts:34,form:'SVVPP'},
+    {t:'Augsburg',g:25,v:9,p:4,s:12,gf:34,gs:44,pts:31,form:'VSPVS'},
+    {t:'Hamburger SV',g:25,v:7,p:8,s:10,gf:30,gs:36,pts:29,form:'PPVVS'},
+    {t:'Union Berlin',g:25,v:7,p:7,s:11,gf:30,gs:40,pts:28,form:'PVSVS'},
+    {t:"M'gladbach",g:25,v:6,p:7,s:12,gf:28,gs:42,pts:25,form:'PSVSS'},
+    {t:'Werder Bremen',g:25,v:6,p:7,s:12,gf:28,gs:44,pts:25,form:'SPPVS'},
+    {t:'1. FC Köln',g:25,v:6,p:6,s:13,gf:26,gs:46,pts:24,form:'SSVSP'},
+    {t:'Mainz 05',g:25,v:5,p:9,s:11,gf:26,gs:42,pts:24,form:'PSPSS'},
+    {t:'St. Pauli',g:25,v:6,p:6,s:13,gf:26,gs:48,pts:24,form:'SSSVS'},
+    {t:'Wolfsburg',g:25,v:5,p:5,s:15,gf:24,gs:52,pts:20,form:'SSSSP'},
+    {t:'Heidenheim',g:25,v:3,p:5,s:17,gf:20,gs:60,pts:14,form:'SSSSS'},
+  ]},
+  {name:'La Liga',badge:'lb-liga',updated:'12 Mar 2026 — 27ª',rows:[
+    {t:'Barcelona',g:27,v:22,p:1,s:4,gf:74,gs:28,pts:67,form:'VVSVV'},
+    {t:'Real Madrid',g:27,v:20,p:3,s:4,gf:66,gs:28,pts:63,form:'VVVPV'},
+    {t:'Atletico Madrid',g:27,v:16,p:6,s:5,gf:54,gs:30,pts:54,form:'VVVPV'},
+    {t:'Villarreal',g:27,v:17,p:3,s:7,gf:52,gs:34,pts:54,form:'PVVVP'},
+    {t:'Real Betis',g:27,v:11,p:10,s:6,gf:42,gs:32,pts:43,form:'PVPVV'},
+    {t:'Celta Vigo',g:27,v:10,p:10,s:7,gf:40,gs:34,pts:40,form:'VPPVV'},
+    {t:'Espanyol',g:27,v:10,p:7,s:10,gf:36,gs:38,pts:37,form:'SVVPS'},
+    {t:'Real Sociedad',g:27,v:9,p:8,s:10,gf:34,gs:36,pts:35,form:'PSSVV'},
+    {t:'Getafe',g:27,v:10,p:5,s:12,gf:32,gs:40,pts:35,form:'PVSVS'},
+    {t:'Athletic Bilbao',g:27,v:10,p:5,s:12,gf:34,gs:42,pts:35,form:'VPVSS'},
+    {t:'Osasuna',g:27,v:9,p:7,s:11,gf:32,gs:38,pts:34,form:'SVPVS'},
+    {t:'Valencia',g:27,v:8,p:8,s:11,gf:30,gs:38,pts:32,form:'PPVSS'},
+    {t:'Rayo Vallecano',g:27,v:7,p:10,s:10,gf:28,gs:34,pts:31,form:'PVSPP'},
+    {t:'Sevilla',g:27,v:8,p:7,s:12,gf:30,gs:40,pts:31,form:'SSSVV'},
+    {t:'Girona',g:27,v:7,p:10,s:10,gf:28,gs:36,pts:31,form:'PVPSS'},
+    {t:'Dep. Alavés',g:27,v:7,p:6,s:14,gf:26,gs:44,pts:27,form:'SSVSS'},
+    {t:'Elche',g:27,v:5,p:11,s:11,gf:24,gs:38,pts:26,form:'PSPSS'},
+    {t:'Mallorca',g:27,v:6,p:7,s:14,gf:24,gs:44,pts:25,form:'SSSSP'},
+    {t:'Levante',g:27,v:5,p:7,s:15,gf:22,gs:50,pts:22,form:'SSSSP'},
+    {t:'Real Oviedo',g:27,v:3,p:9,s:15,gf:18,gs:52,pts:18,form:'PSSSS'},
+  ]},
+  {name:'Ligue 1',badge:'lb-ligue1',updated:'12 Mar 2026 — 25ª',rows:[
+    {t:'PSG',g:25,v:18,p:3,s:4,gf:62,gs:24,pts:57,form:'VVVPV'},
+    {t:'RC Lens',g:25,v:18,p:2,s:5,gf:58,gs:28,pts:56,form:'VVVPV'},
+    {t:'Marseille',g:25,v:14,p:4,s:7,gf:50,gs:32,pts:46,form:'VVPVS'},
+    {t:'Lione',g:25,v:14,p:4,s:7,gf:48,gs:34,pts:46,form:'VPVVP'},
+    {t:'Rennes',g:25,v:12,p:7,s:6,gf:44,gs:30,pts:43,form:'PVVVP'},
+    {t:'Lille',g:25,v:12,p:5,s:8,gf:40,gs:32,pts:41,form:'VVPPV'},
+    {t:'Monaco',g:25,v:12,p:4,s:9,gf:44,gs:38,pts:40,form:'PVVPS'},
+    {t:'Strasburgo',g:25,v:10,p:6,s:9,gf:36,gs:34,pts:36,form:'PVPVS'},
+    {t:'Brest',g:25,v:10,p:6,s:9,gf:36,gs:36,pts:36,form:'VVPPS'},
+    {t:'Lorient',g:25,v:8,p:10,s:7,gf:32,gs:30,pts:34,form:'PPVVP'},
+    {t:'Angers',g:25,v:9,p:5,s:11,gf:32,gs:38,pts:32,form:'SVVPS'},
+    {t:'Tolosa',g:25,v:8,p:7,s:10,gf:30,gs:36,pts:31,form:'PVPVS'},
+    {t:'Paris FC',g:25,v:6,p:9,s:10,gf:26,gs:34,pts:27,form:'PPPVS'},
+    {t:'Le Havre',g:25,v:6,p:8,s:11,gf:24,gs:36,pts:26,form:'SPVPS'},
+    {t:'Nice',g:25,v:6,p:6,s:13,gf:26,gs:46,pts:24,form:'SVPSS'},
+    {t:'Auxerre',g:25,v:4,p:7,s:14,gf:20,gs:46,pts:19,form:'SSSPV'},
+    {t:'Nantes',g:25,v:4,p:5,s:16,gf:18,gs:50,pts:17,form:'SSSSP'},
+    {t:'Metz',g:25,v:3,p:4,s:18,gf:16,gs:58,pts:13,form:'SSSSS'},
+  ]},
+  {name:'Eredivisie',badge:'lb-erediv',updated:'12 Mar 2026',rows:[
+    {t:'Ajax',g:27,v:19,p:3,s:5,gf:70,gs:30,pts:60,form:'VVVVP'},
+    {t:'PSV Eindhoven',g:27,v:18,p:4,s:5,gf:68,gs:28,pts:58,form:'VVVPV'},
+    {t:'Feyenoord',g:27,v:16,p:5,s:6,gf:58,gs:34,pts:53,form:'PVVVV'},
+    {t:'AZ Alkmaar',g:27,v:14,p:5,s:8,gf:50,gs:36,pts:47,form:'VVPVS'},
+    {t:'FC Twente',g:27,v:12,p:6,s:9,gf:44,gs:38,pts:42,form:'PVVPS'},
+    {t:'Utrecht',g:27,v:11,p:5,s:11,gf:40,gs:42,pts:38,form:'SVVPS'},
+  ]},
+  {name:'Primeira Liga',badge:'lb-primeira',updated:'12 Mar 2026',rows:[
+    {t:'Sporting CP',g:27,v:20,p:5,s:2,gf:62,gs:22,pts:65,form:'VVVVV'},
+    {t:'Benfica',g:27,v:18,p:5,s:4,gf:58,gs:28,pts:59,form:'PVVVV'},
+    {t:'Porto',g:27,v:16,p:5,s:6,gf:52,gs:30,pts:53,form:'VVPVS'},
+    {t:'Braga',g:27,v:14,p:6,s:7,gf:46,gs:32,pts:48,form:'VVVPV'},
+    {t:'Guimarães',g:27,v:12,p:7,s:8,gf:40,gs:36,pts:43,form:'PVVVP'},
+    {t:'Famalicão',g:27,v:10,p:6,s:11,gf:34,gs:40,pts:36,form:'SVVPS'},
+  ]},
+  {name:'Süper Lig',badge:'lb-superlig',updated:'12 Mar 2026',rows:[
+    {t:'Galatasaray',g:28,v:20,p:5,s:3,gf:66,gs:26,pts:65,form:'VVVVV'},
+    {t:'Fenerbahçe',g:28,v:19,p:4,s:5,gf:62,gs:28,pts:61,form:'VVPVV'},
+    {t:'Beşiktaş',g:28,v:15,p:7,s:6,gf:50,gs:34,pts:52,form:'VVPPV'},
+    {t:'Trabzonspor',g:28,v:14,p:6,s:8,gf:46,gs:36,pts:48,form:'PVVVS'},
+    {t:'Başakşehir',g:28,v:12,p:7,s:9,gf:42,gs:38,pts:43,form:'VPVPV'},
+    {t:'Konyaspor',g:28,v:10,p:7,s:11,gf:36,gs:42,pts:37,form:'PVVSS'},
+  ]},
+];
+ 
+const FONTI = [
+  {cat:'📊 Statistiche & Analisi',items:[
+    {name:'SofaScore',url:'sofascore.com',desc:'Rating giocatori live, heatmap, statistiche avanzate in tempo reale.',type:'fb-live'},
+    {name:'FBref',url:'fbref.com',desc:'StatsBomb powered. Progressive passes, xG, PPDA, GCA per tutti i campionati.',type:'fb-stats'},
+    {name:'Understat',url:'understat.com',desc:'xG per 6 top leghe europee dal 2014. Modelli Rolling xG.',type:'fb-stats'},
+    {name:'WhoScored',url:'whoscored.com',desc:'Rating 1-10 oltre 200 metriche per partita, top rated automatico.',type:'fb-stats'},
+    {name:'Forebet',url:'forebet.com',desc:'Algoritmi matematici su 160+ campionati. Affidabilità oltre 65%.',type:'fb-stats'},
+    {name:'StatsBomb',url:'statsbomb.com',desc:'360° tracking data, post-shot xG. Partner di 50+ club professionistici.',type:'fb-stats'},
+  ]},
+  {cat:'📺 Media & TV',items:[
+    {name:'Sky Sport',url:'skysport.it',desc:'Analisi tattiche approfondite, giornalisti specializzati, dati Opta.',type:'fb-news'},
+    {name:'DAZN',url:'dazn.com',desc:'Detentore diritti Serie A. Pre e post partita con dati avanzati.',type:'fb-news'},
+    {name:'Eurosport',url:'eurosport.it',desc:'Copertura internazionale, analisi multi-campionato, streaming live.',type:'fb-live'},
+    {name:'Rai Sport',url:'raisport.it',desc:'Copertura nazionale, highlights Serie A e Coppe Europee.',type:'fb-news'},
+  ]},
+  {cat:'📰 Giornali & Portali',items:[
+    {name:'Gazzetta dello Sport',url:'gazzetta.it',desc:'Il più diffuso quotidiano sportivo italiano. Analisi tattiche quotidiane.',type:'fb-news'},
+    {name:'Tuttosport',url:'tuttosport.com',desc:'Focus Juventus e calcio italiano. Buone fonti negli spogliatoi.',type:'fb-news'},
+    {name:'calcio.it',url:'calcio.it',desc:'Portale italiano di notizie calcio, classifiche e pronostici live.',type:'fb-news'},
+    {name:'sport.it',url:'sport.it',desc:'Sport italiano multi-disciplina con focus calcio europeo.',type:'fb-news'},
+    {name:'Forza Football',url:'forzafootball.com',desc:'App live score multisport, classifiche in tempo reale, push notifications.',type:'fb-live'},
+    {name:'Google Sport',url:'google.com/sport',desc:'Knowledge graph sportivo: risultati, classifiche, squadre, statistiche.',type:'fb-ai'},
+  ]},
+  {cat:'🔗 Ufficiali & Federazioni',items:[
+    {name:'UEFA.com',url:'uefa.com',desc:'Dati ufficiali Coppe Europee. Statistiche, regole aggiornate, comunicati.',type:'fb-stats'},
+    {name:'Serie A (ufficiale)',url:'legaseriea.it',desc:'Dati ufficiali Serie A: VAR stats, dati OPTA integrati.',type:'fb-stats'},
+    {name:'Premier League',url:'premierleague.com',desc:'Stats ufficiali PL, Fantasy Football data feed, match centre.',type:'fb-stats'},
+  ]},
+  {cat:'💰 Bookmaker ADM',items:[
+    {name:'Bet365',url:'bet365.com',desc:'Leader mondiale. Quote anticipate fino a 4 giorni. Mercati live profondi.',type:'fb-book'},
+    {name:'SNAI',url:'snai.it',desc:'Bookmaker storico italiano ADM. Punti vendita fisici + digitale.',type:'fb-book'},
+    {name:'William Hill',url:'williamhill.com',desc:'Storico bookmaker britannico. Quote speciali e mercati alternativi.',type:'fb-book'},
+    {name:'Betwin',url:'betwin.it',desc:'Bookmaker italiano ADM. Quota competitiva su calcio europeo.',type:'fb-book'},
+    {name:'Betfair.com',url:'betfair.com',desc:'Exchange leader mondiale. Quote determinate dal mercato, commissione 5%.',type:'fb-book'},
+    {name:'Planetwin365',url:'planetwin365.eu',desc:'Bookmaker ADM italiano. Ampia copertura calcio europeo e americano.',type:'fb-book'},
+    {name:'Sisal',url:'sisal.it',desc:'Bookmaker storico italiano. Grattacini, Superenalotto, Quote ippiche.',type:'fb-book'},
+    {name:'Eurobet',url:'eurobet.it',desc:'Bookmaker ADM con buone quote su Serie A e coppe nazionali.',type:'fb-book'},
+    {name:'GoldBet',url:'goldbet.it',desc:'Operatore ADM. Quota spesso competitiva su mercati alternativi.',type:'fb-book'},
+  ]},
+];
+ 
+const DS_SOURCES = [
+  {id:'overlyzer',name:'Overlyzer',tier:'Pro',coverage:'30+ paesi',desc:'Analytics momentum live. Sovrappressione, attacchi pericolosi, zone di pressione in tempo reale.',metrics:['Overlyzer Score','Momentum','Attack %','Pressure Zone'],color:'var(--accent)'},
+  {id:'statsbomb',name:'StatsBomb',tier:'Pro',coverage:'50+ club partner',desc:'360° data con coordinate di tutti i 22 giocatori per ogni evento. Post-shot xG, Progressive Passes.',metrics:['xG','Post-shot xG','PPDA','Progressive Passes'],color:'var(--accent2)'},
+  {id:'wyscout',name:'Wyscout',tier:'Pro',coverage:'600+ leghe',desc:'Video+dati integrati. Piattaforma di scouting usata da 3000+ club. Ora Hudl property.',metrics:['Match Score','Duels Won','Key Passes','xA'],color:'var(--amber)'},
+  {id:'transfermarkt',name:'Transfermarkt',tier:'Free',coverage:'400K+ giocatori',desc:'Database valori di mercato, storico trasferimenti, contratti e scadenze.',metrics:['Market Value','Transfer History','Contract Expiry','Age Profile'],color:'var(--accent3)'},
+  {id:'opta',name:'Opta/Stats Perform',tier:'Pro',coverage:'150+ club partner',desc:'2000+ eventi per partita. Il dato che alimenta Sky Sport, BBC, La Liga ufficiale.',metrics:['Events/Match','Pass Accuracy','Shots on Target','Pressures'],color:'#c84bff'},
+  {id:'fbref',name:'FBref',tier:'Free',coverage:'Top 30 campionati',desc:'StatsBomb powered. Gratis per analisti. SCA, GCA, PPDA, Progressive Passes pubblici.',metrics:['xG','SCA','GCA','PPDA','Prog. Passes'],color:'var(--accent)'},
+  {id:'understat',name:'Understat',tier:'Free',coverage:'6 top leghe',desc:'xG dal 2014 per EPL, Bundesliga, Serie A, La Liga, Ligue 1, RFPL.',metrics:['xG','xGA','Rolling xG','Shot Maps'],color:'var(--accent2)'},
+  {id:'sofascore',name:'SofaScore',tier:'Freemium',coverage:'20M+ utenti',desc:'Rating live, heatmap, passaggi chiave visibili. API premium per club.',metrics:['Player Rating','Heatmap','Key Passes','Aerial Duels'],color:'var(--amber)'},
+  {id:'whoscored',name:'WhoScored',tier:'Free',coverage:'500+ campionati',desc:'Rating 1–10 calcolato su 200+ metriche per 35.000+ partite/anno.',metrics:['Match Rating','Heatmap','Defensive Actions','Form'],color:'var(--accent3)'},
+  {id:'cies',name:'CIES Observatory',tier:'Free',coverage:'Academia',desc:'Ricerca indipendente svizzera. Modello CIES Player Value, analisi trasferimenti.',metrics:['CIES Value','Age Curve','Scarcity Index','Network Analysis'],color:'var(--accent)'},
+  {id:'athletic',name:'The Athletic',tier:'Pro',coverage:'Giornalismo analitico',desc:'Giornalismo sportivo data-driven. Esclusivi tattici, dati non pubblicati altrove.',metrics:['Tactic Analysis','Exclusive Data','Player Profiles','Match Reports'],color:'var(--accent2)'},
+  {id:'optaanalyst',name:'OptaAnalyst',tier:'Free',coverage:'Opta media channel',desc:'Canale media ufficiale Opta. Stat live, record, curiosità pubblicate pre e post partita.',metrics:['Live Stats','Records','Milestones','Game Facts'],color:'var(--amber)'},
+  {id:'wfa',name:'World Football Analytics',tier:'Pro',coverage:'Ricerca accademica',desc:'Pubblicazioni peer-reviewed su performance modelling, fatigue, injury prediction.',metrics:['Fatigue Model','Injury Risk','Performance Index','xPts'],color:'#c84bff'},
+];
+ 
+const XG_DATA = [
+  {h:'Bologna',a:'Roma',xh:1.24,xa:1.31},
+  {h:'Lille',a:'Aston Villa',xh:1.18,xa:1.42},
+  {h:'Stoccarda',a:'Porto',xh:1.55,xa:1.22},
+  {h:'Panathinaikos',a:'Betis',xh:0.88,xa:1.64},
+  {h:'Nottingham',a:'Midtjylland',xh:1.86,xa:0.92},
+  {h:'Celta Vigo',a:'Lione',xh:1.33,xa:1.28},
+  {h:'Genk',a:'Friburgo',xh:1.41,xa:1.52},
+  {h:'Ferencváros',a:'Braga',xh:0.94,xa:1.58},
+];
+ 
+// ============================================================
+// UTILS
+// ============================================================
+function $(id){return document.getElementById(id);}
+function getCompClass(c){return{UEL:'lb-uel',UCL:'lb-ucl',UCNF:'lb-ucnf',SA:'lb-sa',PL:'lb-pl',BUND:'lb-bund',LIGA:'lb-liga',LIGUE1:'lb-ligue1',EREDIV:'lb-erediv',PRIMEIRA:'lb-primeira',SUPERLIG:'lb-superlig'}[c]||'lb-sa';}
+function getConfColor(c){return c>=75?'var(--accent)':c>=65?'var(--amber)':'var(--accent3)';}
+function teamInitials(name){return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+// ── TEAM COLORS for badges ──
+const TEAM_COLORS = {
+  'Inter':['#0068a8','#f5f5f5'],'Milan':['#ac0000','#000'],'Napoli':['#009fd4','#fff'],
+  'Juventus':['#1a1a1a','#fff'],'Roma':['#9b2a2a','#f5c518'],'Lazio':['#87d0f0','#fff'],
+  'Atalanta':['#1c52a0','#000'],'Fiorentina':['#4b0082','#fff'],'Bologna':['#8b0000','#00b4d8'],
+  'Torino':['#8b2500','#fff'],'Udinese':['#1a1a1a','#fff'],'Sassuolo':['#1a5c1a','#ffd700'],
+  'Genoa':['#a00000','#002fa7'],'Cagliari':['#c00020','#002fa7'],'Parma':['#f5c518','#002fa7'],
+  'Lecce':['#f5c518','#8b0000'],'Verona':['#002fa7','#f5c518'],'Como':['#002fa7','#c0c0c0'],
+  'Cremonese':['#8b0000','#f5c518'],'Pisa':['#00008b','#fff'],
+  'Arsenal':['#c8102e','#fff'],'Chelsea':['#034694','#fff'],'Man City':['#6cabdd','#fff'],
+  'Man Utd':['#da291c','#000'],'Liverpool':['#c8102e','#fff'],'Aston Villa':['#670e36','#95bfe5'],
+  'Tottenham':['#132257','#fff'],'Newcastle':['#241f20','#fff'],'Brentford':['#e30613','#fff'],
+  'Everton':['#003399','#fff'],'West Ham':['#7a263a','#1bb1e7'],'Brighton':['#0057b8','#ffcd00'],
+  'Crystal Palace':['#1b458f','#c4122e'],'Fulham':['#fff','#000'],'Bournemouth':['#da291c','#000'],
+  'Nottingham':['#d71920','#fff'],'Nottm Forest':['#d71920','#fff'],'Wolves':['#fdb913','#231f20'],
+  'Leeds Utd':['#ffcd00','#1d428a'],'Sunderland':['#eb172b','#000'],'Burnley':['#6c1d45','#69be28'],
+  'Bayern Munich':['#dc052d','#fff'],'Dortmund':['#fde100','#000'],'Leverkusen':['#e32221','#000'],
+  'Eintracht':['#e1000f','#000'],'Friburgo':['#d00000','#000'],'Stoccarda':['#e32221','#fff'],
+  'RB Lipsia':['#dd0741','#001e62'],'Hoffenheim':['#1659a8','#fff'],'Union Berlin':['#eb1923','#fff'],
+  'Werder Brema':['#1d7430','#fff'],'St. Pauli':['#6d1c16','#fff'],'Augsburg':['#ba3733','#fff'],
+  "M'gladbach":['#000','#fff'],'Heidenheim':['#b22234','#000'],
+  'Barcelona':['#a50044','#004d98'],'Real Madrid':['#febe10','#00529f'],'Atletico':['#c60b1e','#003790'],
+  'Sevilla':['#d42027','#fff'],'Athletic Bilbao':['#cc1924','#fff'],'Villarreal':['#ffdb00','#fff'],
+  'Betis':['#00692e','#fff'],'Celta Vigo':['#68b3e7','#fff'],'Getafe':['#115b99','#fff'],
+  'PSG':['#004170','#da291c'],'Marseille':['#009bde','#fff'],'Lione':['#1e2d5c','#fff'],
+  'Monaco':['#e8112d','#fff'],'Lille':['#d00b2c','#000'],'RC Lens':['#ffd700','#c00'],
+  'Nice':['#c00','#000'],'Porto':['#004090','#fff'],'Braga':['#d4212b','#fff'],
+  'Panathinaikos':['#007a2f','#fff'],'Genk':['#002d62','#fff'],'Ferencváros':['#196b38','#fff'],
+  'Midtjylland':['#d00','#fff'],'Copenhagen':['#002d62','#fff'],
+  'Bologna':['#9e1614','#00b4d8'],
+};
+ 
+const LEAGUE_BADGE = {
+  'Serie A':'SA','Premier League':'PL','Bundesliga':'BL','La Liga':'LL','Ligue 1':'L1',
+  'Eredivisie':'ED','Primeira Liga':'PL','Süper Lig':'SL',
+};
+ 
+function teamBadge(name, sz=28){
+  const cols = TEAM_COLORS[name];
+  const bg = cols ? cols[0] : '#'+([...name].reduce((a,c)=>a+c.charCodeAt(0),0)%0xffffff).toString(16).padStart(6,'0').slice(0,6);
+  const fg = cols ? cols[1] : '#fff';
+  const initials = name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const r = Math.round(sz*0.35);
+  const fs = Math.round(sz*0.36);
+  return `<div style="width:${sz}px;height:${sz}px;min-width:${sz}px;border-radius:${r}px;background:${bg};display:flex;align-items:center;justify-content:center;font-size:${fs}px;font-weight:800;color:${fg};flex-shrink:0;font-family:'Barlow Condensed',sans-serif;letter-spacing:-.5px;border:1px solid rgba(255,255,255,.08)">${initials}</div>`;
 }
-
-function getConfColor(c) {
-  if(c>=75) return 'var(--accent)';
-  if(c>=65) return 'var(--amber)';
-  return 'var(--accent3)';
+ 
+let toastTimer;
+function toast(icon,msg,ms=4000){
+  $('toastIcon').textContent=icon;
+  $('toastMsg').textContent=msg;
+  $('toastEl').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>$('toastEl').classList.remove('show'),ms);
 }
-
-function buildCard(m) {
-  const tagsHTML = m.tags.map((t,i)=>`<span class="tag ${m.tagTypes[i]||'tag-gray'}">${t}</span>`).join('');
-  return `
-    <div class="match-card" onclick="openModal(${m.id})" data-comp="${m.comp}" data-conf="${m.conf}">
-      <div class="card-header">
-        <div class="comp-badge">
-          <div class="comp-dot"></div>
-          <span class="league-badge ${getCompClass(m.comp)}">${m.compLabel}</span>
-        </div>
-        <span class="time-badge">⏰ ${m.slot}</span>
+function setProgress(pct){$('progBar').style.width=pct+'%';}
+function setUpdState(cls,txt){
+  $('updDot').className='upd-dot '+(cls||'');
+  $('updText').textContent=txt;
+}
+function updateCountdown(){
+  const now=new Date(),tom=new Date(now);
+  tom.setDate(tom.getDate()+1);tom.setHours(0,0,30,0);
+  const ms=tom-now,h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);
+  $('updNext').textContent=`Agg. auto tra ${h}h${m}m`;
+}
+ 
+// ============================================================
+// RENDER
+// ============================================================
+function buildCard(m){
+  const lr=S.liveResults[m.id];
+  const rbadge=lr?`<div class="result-badge ${lr.status}">${lr.score||(lr.status==='live'?'🔴 LIVE':'')}</div>`:'';
+  const tagsHTML=m.tags.map((t,i)=>`<span class="tag ${m.tagTypes[i]||'tag-gray'}">${t}</span>`).join('');
+  return `<div class="match-card" onclick="openModal(${m.id})" data-comp="${m.comp}" data-conf="${m.conf}" data-id="${m.id}">
+    ${rbadge}
+    <div class="card-header">
+      <div class="comp-badge"><div class="comp-dot"></div><span class="league-badge ${getCompClass(m.comp)}">${m.compLabel}</span></div>
+      <span class="time-badge">⏰ ${m.slot}</span>
+    </div>
+    <div class="card-body">
+      <div class="teams-row">
+        <div class="team-block">${teamBadge(m.home,30)}<div class="team-name">${m.home}</div><div class="team-rank">Casa</div></div>
+        <div class="score-box"><div class="score-val">vs</div><div class="score-label">andata</div></div>
+        <div class="team-block">${teamBadge(m.away,30)}<div class="team-name">${m.away}</div><div class="team-rank">Ospite</div></div>
       </div>
-      <div class="card-body">
-        <div class="teams-row">
-          <div class="team-block">
-            <div class="team-name">${m.home}</div>
-            <div class="team-rank">Casa ${m.flag?.charAt(0)||''}</div>
-          </div>
-          <div class="score-box">
-            <div class="score-val">vs</div>
-            <div class="score-label">andata</div>
-          </div>
-          <div class="team-block" style="text-align:right">
-            <div class="team-name">${m.away}</div>
-            <div class="team-rank">Ospite ${m.flag?.charAt(2)||''}</div>
-          </div>
+      <div class="prob-bar-wrap"><div class="pb-1" style="width:${m.prob1}%"></div><div class="pb-x" style="width:${m.probX}%"></div><div class="pb-2" style="width:${m.prob2}%"></div></div>
+      <div class="prob-labels">
+        <div class="pl-item"><div class="pl-pct">${m.prob1}%</div><div class="pl-name">1</div></div>
+        <div class="pl-item"><div class="pl-pct">${m.probX}%</div><div class="pl-name">X</div></div>
+        <div class="pl-item"><div class="pl-pct">${m.prob2}%</div><div class="pl-name">2</div></div>
+      </div>
+      <div class="tags-row">${tagsHTML}</div>
+      <div class="confidence-row">
+        <span class="conf-label">Fiducia</span>
+        <div class="conf-bar"><div class="conf-fill" style="width:${m.conf}%;background:${getConfColor(m.conf)}"></div></div>
+        <span class="conf-val" style="color:${getConfColor(m.conf)}">${m.conf}%</span>
+      </div>
+      <div class="prono-footer">
+        <div><div class="prono-label">Pronostico</div><div class="prono-result">${m.prono}</div></div>
+        <div class="quota-pill">q ${m.quota}</div>
+      </div>
+    </div>
+  </div>`;
+}
+ 
+function renderGrid(containerId,matches){
+  const el=$(containerId); if(!el) return;
+  let f=[...matches];
+  if(S.filterComp!=='all') f=f.filter(m=>m.comp===S.filterComp);
+  const q=($('searchInput')?.value||'').toLowerCase();
+  if(q) f=f.filter(m=>(m.home+' '+m.away+' '+m.compLabel).toLowerCase().includes(q));
+  if(!f.length){el.innerHTML='<div class="loading-state">🔍<br>Nessuna partita trovata</div>';return;}
+  if($('matchCount')) $('matchCount').textContent=f.length+' partite';
+  el.innerHTML=f.map(buildCard).join('');
+}
+ 
+function filterComp(comp,btn){
+  S.filterComp=comp;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid('matchesGrid',MATCHES_TODAY);
+}
+ 
+let _sortAsc=true;
+function sortByConf(){
+  MATCHES_TODAY.sort((a,b)=>_sortAsc?b.conf-a.conf:a.conf-b.conf);
+  _sortAsc=!_sortAsc;
+  renderGrid('matchesGrid',MATCHES_TODAY);
+}
+ 
+function renderCoppe(){
+  const el=$('coppeContent'); if(!el)return;
+  const cups=[
+    {key:'UCL',label:'UEFA Champions League',color:'var(--accent2)',desc:'Ritorno ottavi di finale — 12 marzo 2026',matches:MATCHES_COPPE_EXTRA.filter(m=>m.comp==='UCL')},
+    {key:'UEL',label:'UEFA Europa League',color:'#ff7733',desc:'Andata ottavi di finale — 12 marzo 2026',matches:MATCHES_TODAY.filter(m=>m.comp==='UEL')},
+    {key:'UCNF',label:'UEFA Conference League',color:'#7fcc50',desc:'Andata ottavi di finale — 12 marzo 2026',matches:MATCHES_COPPE_EXTRA.filter(m=>m.comp==='UCNF')},
+  ];
+  el.innerHTML=cups.map(c=>`
+    <div class="cup-section">
+      <div class="cup-header" style="border-bottom-color:${c.color}">
+        <div><div class="cup-title">${c.label}</div><div class="cup-desc">${c.desc}</div></div>
+      </div>
+      <div class="cup-body"><div class="matches-grid">${c.matches.map(buildCard).join('')}</div></div>
+    </div>`).join('');
+}
+ 
+function renderCampionati(){
+  const el=$('campionatiContent'); if(!el)return;
+  const leagues=[
+    {key:'SA',label:'🇮🇹 Serie A',logo:LEAGUE_LOGOS['Serie A'],giornata:'29ª giornata · 13-16 mar 2026',matches:MATCHES_CAMP.filter(m=>m.comp==='SA')},
+    {key:'PL',label:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League',logo:LEAGUE_LOGOS['Premier League'],giornata:'GW30 · 14-16 mar 2026',matches:MATCHES_CAMP.filter(m=>m.comp==='PL')},
+    {key:'BUND',label:'🇩🇪 Bundesliga',logo:LEAGUE_LOGOS['Bundesliga'],giornata:'26ª giornata · 13-15 mar 2026',matches:MATCHES_CAMP.filter(m=>m.comp==='BUND')},
+    {key:'LIGA',label:'🇪🇸 La Liga',logo:LEAGUE_LOGOS['La Liga'],giornata:'27ª giornata · prossimo weekend',matches:MATCHES_CAMP.filter(m=>m.comp==='LIGA')},
+    {key:'LIGUE1',label:'🇫🇷 Ligue 1',logo:LEAGUE_LOGOS['Ligue 1'],giornata:'Giornata 25+ · prossimo weekend',matches:MATCHES_CAMP.filter(m=>m.comp==='LIGUE1')},
+  ];
+  el.innerHTML=leagues.map(l=>`
+    <div style="margin-bottom:28px">
+      <div class="cup-group-title" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:12px">
+        ${l.logo?`<img src="${l.logo}" alt="" width="26" height="26" style="object-fit:contain;border-radius:3px" onerror="this.style.display='none'">`:''} 
+        <span>${l.label}</span>
+        <span style="font-size:10px;color:var(--text3);font-weight:400;font-family:var(--font-body)">${l.giornata||''}</span>
+        <span class="section-count" style="margin-left:auto">${l.matches.length} partite</span>
+      </div>
+      ${l.matches.length?`<div class="matches-grid">${l.matches.map(buildCard).join('')}</div>`:'<div style="color:var(--text3);font-size:13px;padding:14px 0">Nessuna partita programmata oggi.</div>'}
+    </div>`).join('');
+}
+ 
+ 
+const PLAYER_PHOTOS = {};
+ 
+ 
+function renderPlayers(){
+  const el=$('playerGrid'); if(!el)return;
+  let f=PLAYERS;
+  if(S.playerFilter!=='all') f=f.filter(p=>p.pos===S.playerFilter);
+  const getPosClass=p=>({ATT:'pos-att',CEN:'pos-mid',DIF:'pos-def',POR:'pos-por'}[p]||'pos-mid');
+  el.innerHTML=f.map(p=>{
+    const sk=p.pos==='POR'?['CS','Para','App']:['Gol','Ast','App'];
+    const sv=p.pos==='POR'?[Math.floor(p.apps*.4),Math.floor(p.apps*2.1),p.apps]:[p.goals,p.assist,p.apps];
+    const photo=PLAYER_PHOTOS[p.name];
+    const clubLogo=teamBadge(p.team,16);
+    return `<div class="player-card" onclick="openPlayerModal(${p.id})">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="player-avatar" style="${photo?'overflow:hidden;padding:0;background:transparent':''}">
+          ${photo?`<img src="${photo}" alt="${p.name}" width="52" height="52" style="width:52px;height:52px;object-fit:cover;object-position:top center;border-radius:50%;display:block" onerror="this.outerHTML='<span style=font-size:24px>${p.emoji}</span>'">`:`<span style="font-size:24px">${p.emoji}</span>`}
         </div>
-        <div class="prob-section">
-          <div class="prob-bar-wrap">
-            <div class="pb-1" style="width:${m.prob1}%"></div>
-            <div class="pb-x" style="width:${m.probX}%"></div>
-            <div class="pb-2" style="width:${m.prob2}%"></div>
-          </div>
-          <div class="prob-labels">
-            <div class="pl-item"><div class="pl-pct">${m.prob1}%</div><div class="pl-name">1</div></div>
-            <div class="pl-item"><div class="pl-pct">${m.probX}%</div><div class="pl-name">X</div></div>
-            <div class="pl-item"><div class="pl-pct">${m.prob2}%</div><div class="pl-name">2</div></div>
-          </div>
-        </div>
-        <div class="tags-row">${tagsHTML}</div>
-        <div class="confidence-row">
-          <span class="conf-label">Fiducia</span>
-          <div class="conf-bar"><div class="conf-fill" style="width:${m.conf}%;background:${getConfColor(m.conf)}"></div></div>
-          <span class="conf-val" style="color:${getConfColor(m.conf)}">${m.conf}%</span>
-        </div>
-        <div class="prono-footer">
-          <div>
-            <div class="prono-label">Pronostico</div>
-            <div class="prono-result">${m.prono}</div>
-          </div>
-          <div class="quota-pill">q ${m.quota}</div>
-        </div>
+        <span class="player-pos-badge ${getPosClass(p.pos)}">${p.pos}</span>
+      </div>
+      <div class="player-name">${p.name}</div>
+      <div class="player-team" style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+        ${clubLogo}<span>${p.nat} ${p.team} · ${p.age}a</span>
+      </div>
+      <div class="player-stats">${sv.map((v,i)=>`<div class="ps-item"><div class="ps-val">${v}</div><div class="ps-label">${sk[i]}</div></div>`).join('')}</div>
+      <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:9px;color:var(--text3)">Mercato</span>
+        <span style="font-size:11px;font-weight:700;color:var(--amber)">${p.val}</span>
       </div>
     </div>`;
+  }).join('');
 }
-
-function renderGrid(container, matches) {
-  const el = document.getElementById(container);
-  if(!el) return;
-  let filtered = matches;
-  if(currentFilter !== 'all') filtered = matches.filter(m => m.comp === currentFilter);
-  const q = document.getElementById('searchInput')?.value.toLowerCase() || '';
-  if(q) filtered = filtered.filter(m => (m.home+m.away+m.compLabel).toLowerCase().includes(q));
-  if(!filtered.length) { el.innerHTML = '<div class="loading-state"><div style="font-size:32px;margin-bottom:12px">🔍</div><div>Nessuna partita trovata</div></div>'; return; }
-  el.innerHTML = filtered.map(buildCard).join('');
-}
-
-function filterByComp(comp, btn) {
-  currentFilter = comp;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+ 
+function filterPlayers(pos,btn){
+  S.playerFilter=pos;
+  document.querySelectorAll('.player-filter .filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderGrid('matchesGrid', MATCHES);
+  renderPlayers();
 }
-
-function filterCards() { renderGrid('matchesGrid', MATCHES); }
-
-function sortByConf() {
-  MATCHES.sort((a,b) => sortAsc ? b.conf - a.conf : a.conf - b.conf);
-  sortAsc = !sortAsc;
-  renderGrid('matchesGrid', MATCHES);
-}
-
-function openModal(id) {
-  const m = [...MATCHES,...DOMANI_MATCHES].find(x=>x.id===id);
-  if(!m) return;
-  document.getElementById('modalTitle').textContent = `${m.home} vs ${m.away}`;
-  const srcColors = {agree:'sa-agree',partial:'sa-partial',diff:'sa-diff'};
-  const srcLabels = {agree:'✓ Concorda','partial':'~ Parziale','diff':'✗ Differisce'};
-  const srcHTML = m.sources.length ? m.sources.map(s=>`
-    <div class="source-analysis-row">
-      <span class="sa-name">${s.n}</span>
-      <span class="sa-result ${srcColors[s.a]}">${s.r}</span>
-      <span class="sa-conf ${srcColors[s.a]}">${srcLabels[s.a]}</span>
-    </div>`).join('') : '<p style="color:var(--text3);font-size:13px">Dati non disponibili per questa partita.</p>';
-
-  document.getElementById('modalBody').innerHTML = `
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
-      <span class="league-badge ${getCompClass(m.comp)}">${m.compLabel}</span>
-      <span class="tag tag-gray">⏰ ${m.slot}</span>
-      <span class="tag" style="background:rgba(0,229,160,0.1);color:var(--accent);border:1px solid rgba(0,229,160,0.25)">Fiducia: ${m.conf}%</span>
-    </div>
-    <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px">${m.info}</p>
-    <div class="modal-section-title">Probabilità 1X2</div>
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <div style="flex:1;background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border)">
-        <div style="font-size:22px;font-weight:800;font-family:var(--font-head);color:var(--accent2)">${m.prob1}%</div>
-        <div style="font-size:11px;color:var(--text3)">1 — ${m.home}</div>
+ 
+function renderClassifiche(){
+  const el=$('classGrid'); if(!el)return;
+  $('classDate').textContent='Aggiornate '+new Date().toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'});
+  el.innerHTML=CLASSIFICHE.map(c=>`
+    <div class="class-card">
+      <div class="class-card-header" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          ${LEAGUE_LOGOS[c.name]?`<img src="${LEAGUE_LOGOS[c.name]}" alt="${c.name}" width="26" height="26" style="object-fit:contain" onerror="this.style.display='none'">`:''}
+          <span class="league-badge ${c.badge}">${c.name}</span>
+        </div>
+        <span class="class-updated">${c.updated}</span>
       </div>
-      <div style="flex:1;background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border)">
-        <div style="font-size:22px;font-weight:800;font-family:var(--font-head);color:var(--text3)">${m.probX}%</div>
-        <div style="font-size:11px;color:var(--text3)">X — Pareggio</div>
-      </div>
-      <div style="flex:1;background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border)">
-        <div style="font-size:22px;font-weight:800;font-family:var(--font-head);color:var(--accent)">${m.prob2}%</div>
-        <div style="font-size:11px;color:var(--text3)">2 — ${m.away}</div>
-      </div>
-    </div>
-    <div class="modal-section-title">Pronostico finale</div>
-    <div style="background:rgba(0,229,160,0.07);border:1px solid rgba(0,229,160,0.2);border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Risultato atteso</div>
-        <div style="font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--accent)">${m.prono}</div>
-      </div>
-      <div class="quota-pill" style="font-size:14px;padding:6px 14px">q ${m.quota}</div>
-    </div>
-    <div class="modal-section-title">Analisi per fonte (${m.sources.length} fonti)</div>
-    ${srcHTML}
-  `;
-  document.getElementById('modalOverlay').classList.add('open');
-}
-
-function closeModal(e) {
-  if(!e || e.target === document.getElementById('modalOverlay')) {
-    document.getElementById('modalOverlay').classList.remove('open');
-  }
-}
-
-function switchTab(t) {
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
-    const tabs=['oggi','domani','live','classifica','analisi','fonti'];
-    b.classList.toggle('active', tabs[i]===t);
-  });
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.getElementById('tab-'+t)?.classList.add('active');
-  if(t==='domani' && !document.getElementById('domaniGrid').innerHTML) renderGrid('domaniGrid', DOMANI_MATCHES);
-  if(t==='fonti') renderFonti();
-  if(t==='analisi') renderAnalisi();
-  if(t==='classifica') renderClassifica();
-}
-
-function renderFonti() {
-  const cats = [...new Set(FONTI.map(f=>f.cat))];
-  const html = cats.map(cat=>`
-    <div style="margin-bottom:24px">
-      <div class="section-header"><div class="section-title">${cat} <span class="section-count">${FONTI.filter(f=>f.cat===cat).length}</span></div></div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
-        ${FONTI.filter(f=>f.cat===cat).map(f=>`
-          <div class="source-chip" style="flex-direction:column;align-items:flex-start;padding:12px;border-radius:10px;cursor:default">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-              <span style="font-size:20px">${f.icon}</span>
-              <div>
-                <div style="font-weight:600;font-size:13px;color:var(--text)">${f.name}</div>
-                <div class="source-cat">${f.cat}</div>
-              </div>
-            </div>
-            <div style="font-size:11px;color:var(--text3);line-height:1.5">${f.desc}</div>
-          </div>`).join('')}
-      </div>
-    </div>`).join('');
-  document.getElementById('fontiContent').innerHTML = html;
-}
-
-function renderAnalisi() {
-  const html = MATCHES.map(m=>`
-    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <span class="league-badge ${getCompClass(m.comp)}">${m.compLabel}</span>
-        <span style="font-family:var(--font-head);font-size:17px;font-weight:700">${m.home} vs ${m.away}</span>
-        <span style="font-size:11px;color:var(--text3);margin-left:auto">⏰ ${m.slot}</span>
-      </div>
-      <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px">${m.info}</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <span class="tag tag-green">📊 Pronostico: ${m.prono}</span>
-        <span class="tag tag-amber">💰 Quota: ${m.quota}</span>
-        <span class="tag ${m.conf>=75?'tag-green':m.conf>=65?'tag-amber':'tag-red'}">🎯 Fiducia: ${m.conf}%</span>
-        <span class="tag tag-gray">📡 ${m.sources.length} fonti</span>
-      </div>
-    </div>`).join('');
-  document.getElementById('analisiContent').innerHTML = html;
-}
-
-function renderClassifica() {
-  const classifiche = [
-    {name:'Europa League', items:[{t:'Aston Villa',p:18},{t:'Roma',p:15},{t:'Bologna',p:14},{t:'Nottingham Forest',p:13},{t:'Braga',p:13},{t:'Midtjylland',p:12}]},
-    {name:'Serie A', items:[{t:'Inter',p:62},{t:'Napoli',p:58},{t:'Lazio',p:55},{t:'Atalanta',p:52},{t:'Milan',p:50},{t:'Juventus',p:48}]},
-    {name:'Premier League', items:[{t:'Liverpool',p:70},{t:'Arsenal',p:61},{t:'Man City',p:58},{t:'Chelsea',p:54},{t:'Newcastle',p:51},{t:'Aston Villa',p:49}]},
-  ];
-  const html = classifiche.map(c=>`
-    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;overflow:hidden">
-      <div style="padding:12px 16px;background:var(--bg4);border-bottom:1px solid var(--border)">
-        <div class="section-title" style="font-size:14px">${c.name}</div>
-      </div>
-      <table style="width:100%;border-collapse:collapse">
-        ${c.items.map((r,i)=>`
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:10px 14px;font-size:12px;color:var(--text3);width:24px">${i+1}</td>
-            <td style="padding:10px 4px;font-size:13px;font-weight:500;color:var(--text)">${r.t}</td>
-            <td style="padding:10px 14px;font-size:13px;font-weight:700;color:var(--accent);text-align:right">${r.p} pt</td>
-          </tr>`).join('')}
+      <table class="class-table">
+        <thead><tr>
+          <td style="padding:6px 10px;font-size:9px;color:var(--text3)">#</td>
+          <td style="font-size:9px;color:var(--text3)">Squadra</td>
+          <td style="font-size:9px;color:var(--text3);text-align:center">G</td>
+          <td style="font-size:9px;color:var(--text3);text-align:center">GF:GS</td>
+          <td style="font-size:9px;color:var(--text3);text-align:right;padding-right:4px">Form</td>
+          <td style="font-size:9px;color:var(--text3);text-align:right;padding:6px 10px">Pt</td>
+        </tr></thead>
+        <tbody>${c.rows.map((r,i)=>{
+          const fd=r.form.split('').map(f=>`<div class="form-dot form-${f==='V'?'W':f==='P'?'D':'L'}">${f}</div>`).join('');
+          return `<tr>
+            <td class="class-pos ${i<3?'top3':''}">${i+1}</td>
+            <td class="class-team"><div style="display:flex;align-items:center;gap:6px">${teamBadge(r.t,20)}<span>${r.t}</span></div></td>
+            <td style="color:var(--text3);font-size:10px;text-align:center">${r.g}</td>
+            <td style="color:var(--text3);font-size:10px;text-align:center">${r.gf}:${r.gs}</td>
+            <td><div class="class-form">${fd}</div></td>
+            <td class="class-pts">${r.pts}</td>
+          </tr>`;
+        }).join('')}</tbody>
       </table>
     </div>`).join('');
-  document.getElementById('classGrid').innerHTML = html;
 }
-
-function toggleAI() {
-  const p = document.getElementById('aiPanel');
-  p.classList.toggle('visible');
+ 
+function renderAnalisi(){
+  const el=$('analisiContent'); if(!el)return;
+  const all=[...MATCHES_TODAY,...MATCHES_COPPE_EXTRA.slice(0,2)];
+  el.innerHTML=`
+    <div class="ai-panel visible" style="margin-bottom:22px">
+      <div class="ai-panel-header">
+        <div class="ai-avatar">🤖</div>
+        <div><div class="ai-name">PRONOapp AI — Analisi del giorno</div><div class="ai-desc">Powered by Claude · 20 fonti integrate</div></div>
+      </div>
+      <div class="ai-messages" id="aiMsgsAnalisi">
+        <div class="ai-msg bot">📊 <strong>Analisi 12 marzo 2026</strong>: Giornata UEL ottavi. Top pick: <strong>Nottingham Forest vs Midtjylland</strong> (79% fiducia). Derby 🇮🇹 Bologna–Roma il più equilibrato (X favorito). <strong>Aston Villa</strong> con Emery sfavorita logistica ma favorita quote.</div>
+      </div>
+      <div class="ai-input-row">
+        <input class="ai-input" id="aiInputAnalisi" placeholder="Analisi specifica, confronto squadre..." onkeydown="if(event.key==='Enter')sendAI('aiInputAnalisi','aiMsgsAnalisi')">
+        <button class="ai-send" onclick="sendAI('aiInputAnalisi','aiMsgsAnalisi')">→</button>
+      </div>
+    </div>
+    <div class="matches-grid">${all.map(buildCard).join('')}</div>`;
 }
-
-function sendAIMsg() {
-  const inp = document.getElementById('aiInput');
-  const q = inp.value.trim(); if(!q) return;
-  const msgs = document.getElementById('aiMessages');
-  msgs.innerHTML += `<div class="ai-msg user">${q}</div>`;
-  inp.value = '';
-  const lower = q.toLowerCase();
-  let resp = AI_RESPONSES.default;
-  for(const [k,v] of Object.entries(AI_RESPONSES)) {
-    if(lower.includes(k)) { resp = v; break; }
+ 
+function renderFonti(){
+  const el=$('fontiContent'); if(!el)return;
+  el.innerHTML=FONTI.map(sec=>`
+    <div class="fonti-section">
+      <div class="fonti-section-title">${sec.cat}</div>
+      <div class="fonti-grid">${sec.items.map(f=>`
+        <div class="fonte-card">
+          <div class="fonte-name">${f.name}</div>
+          <div class="fonte-url" onclick="window.open('https://'+this.textContent,'_blank')">${f.url}</div>
+          <div class="fonte-desc">${f.desc}</div>
+          <span class="fonte-badge ${f.type}">${{
+            'fb-live':'🔴 Live','fb-stats':'📊 Stats','fb-news':'📰 Media','fb-book':'💰 Bookmaker','fb-ai':'🤖 Motore'
+          }[f.type]||'—'}</span>
+        </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+ 
+function renderDS(){
+  const el=$('dsContent'); if(!el)return;
+  const xgRows=XG_DATA.map(x=>{
+    const tot=x.xh+x.xa||1,ph=x.xh/tot*100,pa=x.xa/tot*100;
+    return `<tr>
+      <td style="font-size:11px;font-weight:600">${x.h}</td>
+      <td style="text-align:center"><span style="color:var(--accent2);font-weight:700;font-family:var(--font-head)">${x.xh.toFixed(2)}</span><div class="xg-bar" style="width:${Math.round(ph)}px;background:var(--accent2)"></div></td>
+      <td style="text-align:center"><span style="color:var(--accent);font-weight:700;font-family:var(--font-head)">${x.xa.toFixed(2)}</span><div class="xg-bar" style="width:${Math.round(pa)}px;background:var(--accent)"></div></td>
+      <td style="font-size:11px;font-weight:600">${x.a}</td>
+    </tr>`;
+  }).join('');
+  const dsCards=DS_SOURCES.map(d=>`
+    <div class="ds-card" onclick="openDSModal('${d.id}')">
+      <div class="ds-card-top">
+        <div class="ds-card-name">${d.name}</div>
+        <span class="tag ${d.tier==='Pro'?'tag-red':d.tier==='Free'?'tag-green':'tag-amber'}">${d.tier}</span>
+      </div>
+      <div class="ds-card-desc">${d.desc}</div>
+      <div class="ds-card-tags">${d.metrics.map(m=>`<span class="tag tag-blue">${m}</span>`).join('')}</div>
+      <div style="margin-top:8px;font-size:9px;color:var(--text3)">Copertura: ${d.coverage}</div>
+    </div>`).join('');
+  el.innerHTML=`
+    <div class="section-header"><div class="section-title">xG Attesi — Oggi</div></div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--card-radius);overflow:hidden;margin-bottom:22px">
+      <table class="xg-table" style="width:100%">
+        <thead><tr><th style="text-align:left">Casa</th><th>xG Casa</th><th>xG Ospit.</th><th style="text-align:left">Ospite</th></tr></thead>
+        <tbody>${xgRows}</tbody>
+      </table>
+    </div>
+    <div class="section-header"><div class="section-title">13 Fonti Data Science</div></div>
+    <div class="ds-grid">${dsCards}</div>`;
+}
+ 
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(id){
+  const all=[...MATCHES_TODAY,...MATCHES_CAMP,...MATCHES_COPPE_EXTRA];
+  const m=all.find(x=>x.id===id); if(!m)return;
+  $('modalTitle').textContent=`${m.home} vs ${m.away}`;
+  const sa={agree:'src-agree',partial:'src-partial',diff:'src-diff'};
+  const sl={agree:'✓ Concorda',partial:'~ Parziale',diff:'✗ Differisce'};
+  const srcHTML=m.sources.length?m.sources.map(s=>`<div class="source-row"><span class="src-name">${s.n}</span><span class="src-val ${sa[s.a]||''}">${s.r}</span><span class="${sa[s.a]||''}" style="font-size:10px">${sl[s.a]||''}</span></div>`).join(''):'<p style="color:var(--text3);font-size:12px">Dati non disponibili.</p>';
+  $('modalBody').innerHTML=`
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px">
+      <span class="league-badge ${getCompClass(m.comp)}">${m.compLabel}</span>
+      <span class="tag tag-gray">⏰ ${m.slot}</span>
+      <span class="tag tag-green">🎯 ${m.conf}% fiducia</span>
+    </div>
+    <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:14px">${m.info}</p>
+    <div class="modal-section-title">Probabilità 1X2</div>
+    <div style="display:flex;gap:7px;margin-bottom:14px">
+      <div style="flex:1;background:var(--bg3);border-radius:8px;padding:11px;text-align:center;border:1px solid var(--border)"><div style="font-size:20px;font-weight:800;font-family:var(--font-head);color:var(--accent2)">${m.prob1}%</div><div style="font-size:10px;color:var(--text3)">1 — ${m.home}</div></div>
+      <div style="flex:1;background:var(--bg3);border-radius:8px;padding:11px;text-align:center;border:1px solid var(--border)"><div style="font-size:20px;font-weight:800;font-family:var(--font-head);color:var(--text3)">${m.probX}%</div><div style="font-size:10px;color:var(--text3)">X</div></div>
+      <div style="flex:1;background:var(--bg3);border-radius:8px;padding:11px;text-align:center;border:1px solid var(--border)"><div style="font-size:20px;font-weight:800;font-family:var(--font-head);color:var(--accent)">${m.prob2}%</div><div style="font-size:10px;color:var(--text3)">2 — ${m.away}</div></div>
+    </div>
+    <div class="modal-section-title">Pronostico</div>
+    <div style="background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.2);border-radius:9px;padding:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:3px">Risultato atteso</div><div style="font-family:var(--font-head);font-size:19px;font-weight:800;color:var(--accent)">${m.prono}</div></div>
+      <div class="quota-pill" style="font-size:13px;padding:5px 12px">q ${m.quota}</div>
+    </div>
+    <div class="modal-section-title">Analisi fonti (${m.sources.length})</div>${srcHTML}`;
+  $('modalOverlay').classList.add('open');
+}
+ 
+function openDSModal(id){
+  const d=DS_SOURCES.find(x=>x.id===id); if(!d)return;
+  $('modalTitle').textContent=d.name;
+  $('modalBody').innerHTML=`
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <span class="tag ${d.tier==='Pro'?'tag-red':d.tier==='Free'?'tag-green':'tag-amber'}">${d.tier}</span>
+      <span class="tag tag-blue">📍 ${d.coverage}</span>
+    </div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px">${d.desc}</p>
+    <div class="modal-section-title">Metriche chiave</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">${d.metrics.map(m=>`<span class="tag tag-green">${m}</span>`).join('')}</div>`;
+  $('modalOverlay').classList.add('open');
+}
+ 
+function openPlayerModal(id){
+  const p=PLAYERS.find(x=>x.id===id); if(!p)return;
+  $('modalTitle').textContent=p.name;
+  $('modalBody').innerHTML=`
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <div class="player-avatar" style="width:56px;height:56px;font-size:28px">${p.emoji}</div>
+      <div>
+        <div style="font-size:11px;color:var(--text3)">${p.nat} ${p.team}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${p.pos} · ${p.age} anni · ${p.foot==='D'?'Destro':'Sinistro'} · ${p.height}</div>
+        <div style="margin-top:6px;font-size:13px;font-weight:700;color:var(--amber)">💰 ${p.val}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      ${[['⚽','Gol',p.goals],['🎯','Assist',p.assist],['📅','App.',p.apps]].map(([e,l,v])=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center"><div style="font-size:20px">${e}</div><div style="font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--accent2)">${v}</div><div style="font-size:10px;color:var(--text3)">${l}</div></div>`).join('')}
+    </div>`;
+  $('modalOverlay').classList.add('open');
+}
+ 
+function closeModal(e){if(!e||e.target===$('modalOverlay'))$('modalOverlay').classList.remove('open');}
+ 
+// ============================================================
+// AI CHAT — calls Anthropic API
+// ============================================================
+function toggleAI(panelId){const p=$(panelId);p.classList.toggle('visible');}
+ 
+function addMsg(containerId,cls,html){
+  const c=$(containerId);
+  const d=document.createElement('div');
+  d.className='ai-msg '+cls;
+  d.innerHTML=html;
+  c.appendChild(d);
+  c.scrollTop=c.scrollHeight;
+  return d;
+}
+ 
+async function sendAI(inputId,msgsId){
+  const inp=$(inputId);
+  const q=inp.value.trim(); if(!q)return;
+  inp.value='';
+  addMsg(msgsId,'user',q);
+  const typing=addMsg(msgsId,'bot typing','⏳ Analisi in corso...');
+ 
+  // Build context string
+  const matchCtx=MATCHES_TODAY.map(m=>`${m.home} vs ${m.away} (${m.compLabel}, ${m.slot}): Prono ${m.prono} q${m.quota} fiducia ${m.conf}% — fonti: ${m.sources.slice(0,4).map(s=>s.n+' '+s.r).join(', ')}`).join('\n');
+  const systemPrompt=`Sei PRONOapp AI, esperto di pronostici calcio europeo. 
+Partite di oggi (12 marzo 2026):\n${matchCtx}
+ 
+Fonti disponibili: Bet365, SNAI, William Hill, Betwin, Betfair, Planetwin365, Eurosport, calcio.it, sport.it, Forza Football, Google Sport, SofaScore, Forebet, Sky Sport, DAZN, Opta, StatsBomb, Understat.
+ 
+Rispondi in italiano, in modo conciso e professionale. Dai analisi tattiche, quote comparate, consigli motivati. Se chiesto di una partita specifica, analizza probabilità, forma, head-to-head e quota di valore.`;
+ 
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:systemPrompt,
+        messages:[{role:'user',content:q}]
+      })
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const txt=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    typing.className='ai-msg bot';
+    typing.innerHTML=txt||'(risposta vuota)';
+  }catch(e){
+    typing.className='ai-msg bot';
+    typing.innerHTML=`⚠️ Errore API: ${e.message}. Controlla la connessione.`;
   }
+}
+ 
+// ============================================================
+// AUTO-UPDATE ENGINE
+// ============================================================
+function isMatchTime(){const h=new Date().getHours();return h>=17&&h<=23;}
+ 
+function buildUpdatePrompt(){
+  const d=new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  return `Sei il motore dati di PRONOapp. Data: ${d}.
+Genera pronostici per le partite reali di oggi in JSON. Rispondi SOLO con JSON, nessun testo extra, nessun markdown.
+ 
+{"matches":[{"id":1,"comp":"UEL","compLabel":"Europa League","slot":"21:00","home":"Juventus","away":"Real Madrid","prob1":35,"probX":28,"prob2":37,"prono":"2 — 0-2","quota":"2.10","conf":68,"tags":["UCL clash","Real fav"],"tagTypes":["tag-amber","tag-green"],"info":"Breve analisi tattica in italiano.","sources":[]}],"ticker":["📊 Notizia 1","⚽ Notizia 2"]}
+ 
+Genera 5-10 partite reali di oggi. Solo dati reali — squadre che giocano davvero oggi.`;
+}
+ 
+function parseJSON(raw){
+  try{
+    const c=raw.replace(/```json|```/gi,'').trim();
+    const s=c.indexOf('{'),e=c.lastIndexOf('}');
+    if(s<0||e<0)return null;
+    return JSON.parse(c.slice(s,e+1));
+  }catch(e){console.warn('[PRONOapp] parseJSON:',e.message);return null;}
+}
+ 
+async function doRefresh(type='auto'){
+  if(S.updating)return;
+  S.updating=true;
+  $('btnRefresh').disabled=true;
+  setUpdState('spin','Recupero dati in corso...');
+  setProgress(10);
+ 
+  try{
+    setProgress(30);
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:buildUpdatePrompt()}]
+      })
+    });
+    setProgress(70);
+    if(!res.ok) throw new Error('API '+res.status);
+    const data=await res.json();
+    const txt=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const parsed=parseJSON(txt);
+    setProgress(90);
+ 
+    if(parsed&&parsed.matches&&parsed.matches.length){
+      // Replace matches data
+      MATCHES_TODAY.length=0;
+      parsed.matches.forEach((m,i)=>{m.id=m.id||100+i;MATCHES_TODAY.push(m);});
+      S.liveResults={};
+      renderGrid('matchesGrid',MATCHES_TODAY);
+      if($('cntOggi'))$('cntOggi').textContent=MATCHES_TODAY.length;
+      if(parsed.ticker) buildTicker(parsed.ticker);
+      S.lastUpdate=new Date().toISOString();
+      toast('✅',`${MATCHES_TODAY.length} partite aggiornate${type==='manual'?' manualmente':''}!`);
+      setUpdState('ok',`Aggiornato ${new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}`);
+    }else{
+      throw new Error('Dati non validi nella risposta');
+    }
+    setProgress(100);
+    setTimeout(()=>setProgress(0),600);
+  }catch(e){
+    console.warn('[PRONOapp] refresh:',e);
+    setUpdState('err','Aggiornamento fallito — uso dati locali');
+    setProgress(0);
+    toast('⚠️','Aggiornamento non riuscito: '+e.message);
+    // Retry in 5 min
+    setTimeout(()=>doRefresh('retry'),5*60*1000);
+  }finally{
+    S.updating=false;
+    $('btnRefresh').disabled=false;
+  }
+}
+ 
+// Live score polling
+let _pollInterval=null;
+async function pollLive(){
+  if(!isMatchTime()||!MATCHES_TODAY.length)return;
+  const pending=MATCHES_TODAY.filter(m=>!S.liveResults[m.id]||S.liveResults[m.id].status==='live');
+  if(!pending.length)return;
+  try{
+    const list=pending.map(m=>`${m.home} vs ${m.away}`).join(', ');
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        messages:[{role:'user',content:`Data: ${new Date().toLocaleDateString('it-IT')}. Stato attuale delle partite: ${list}. 
+Rispondi SOLO con JSON: {"results":[{"home":"X","away":"Y","score":"1-0","status":"live|finished|scheduled"}]}`}]
+      })
+    });
+    if(!res.ok)return;
+    const data=await res.json();
+    const txt=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const parsed=parseJSON(txt);
+    if(!parsed||!parsed.results)return;
+ 
+    let anyDone=false;
+    parsed.results.forEach(r=>{
+      const m=MATCHES_TODAY.find(x=>x.home.toLowerCase().split(' ')[0]===r.home.toLowerCase().split(' ')[0]);
+      if(!m)return;
+      if(r.status==='finished'&&!S.liveResults[m.id]?.done){
+        const [gh,ga]=(r.score||'').split('-').map(Number);
+        const exp=m.prono.split('—')[0].trim();
+        const actual=gh>ga?'1':gh<ga?'2':'X';
+        const ok=exp.includes(actual);
+        S.liveResults[m.id]={score:r.score,status:ok?'correct':'wrong',done:true};
+        toast(ok?'✅':'❌',`${m.home} ${r.score} ${m.away} — ${ok?'CORRETTO! 🎯':'Sbagliato'}`);
+        anyDone=true;
+      }else if(r.status==='live'){
+        S.liveResults[m.id]={score:r.score,status:'live'};
+      }
+    });
+ 
+    if(anyDone){
+      renderGrid('matchesGrid',MATCHES_TODAY);
+      // All done? schedule next-day refresh in 30s
+      const allDone=MATCHES_TODAY.every(m=>S.liveResults[m.id]?.done);
+      if(allDone){toast('🌙','Tutte le partite finite — aggiornamento domani...');setTimeout(()=>doRefresh('end_of_day'),30000);}
+    }else if(Object.values(S.liveResults).some(r=>r.status==='live')){
+      renderGrid('matchesGrid',MATCHES_TODAY);
+      setUpdState('spin','🔴 Partite live in corso...');
+    }
+  }catch(e){console.warn('[PRONOapp] poll:',e.message);}
+}
+ 
+function scheduleMidnight(){
+  const now=new Date(),tom=new Date(now);
+  tom.setDate(tom.getDate()+1);tom.setHours(0,0,30,0);
+  const ms=tom-now;
   setTimeout(()=>{
-    msgs.innerHTML += `<div class="ai-msg bot">${resp.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
-    msgs.scrollTop = msgs.scrollHeight;
-  }, 700);
+    doRefresh('midnight');
+    setInterval(()=>doRefresh('midnight'),24*60*60*1000);
+  },ms);
 }
-
-function buildTicker() {
-  const items = [
-    'Bologna–Roma ore 18:45 • Derby italiano Europa League',
-    'Aston Villa favorito vs Lille • q 2.40',
-    'Nottingham Forest • Alta fiducia 79%',
-    'Braga difesa di ferro • 2 gol subiti in 7 trasferte',
-    'Betis Siviglia • 1 vittoria su 18 vs Spagna per il Panathinaikos',
-    'Stoccarda–Porto • GG q 1.57',
-    'Celta Vigo–Lione • Partita equilibrata • 1X q 1.45',
-    'Genk • 17 gol segnati in EL questa stagione',
+ 
+function manualRefresh(){doRefresh('manual');}
+ 
+function buildTicker(items){
+  const defaults=[
+    '⚽ Europa League ottavi: 8 partite oggi — 18:45 e 21:00',
+    '📊 Nottingham Forest vs Midtjylland — PRONO: 1 · fiducia 79%',
+    '🏆 Champions League: Arsenal–Leverkusen e Real–Man City in settimana',
+    '📈 Migliore quota giornata: Lille–Aston Villa X2 @ 1.35',
+    '🔵 Bologna–Roma: derby 🇮🇹 in Europa — X favorito q2.10',
+    '💰 Bet365 · SNAI · William Hill · Betfair · Planetwin · Betwin aggiornati',
   ];
-  const doubled = [...items,...items];
-  document.getElementById('tickerInner').innerHTML = doubled.map(i=>`
-    <div class="ticker-item"><div class="ticker-dot"></div><span>${i}</span></div>`).join('');
+  const src=items||defaults;
+  const txt=src.join('  •  ');
+  $('tickerEl').textContent=txt+'  •  '+txt;
 }
-
+ 
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(t){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  $('tab-'+t).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>{if(b.textContent.toLowerCase().includes(t)||b.getAttribute('onclick')?.includes("'"+t+"'"))b.classList.add('active');});
+  if(t==='coppe')renderCoppe();
+  if(t==='campionati')renderCampionati();
+  if(t==='giocatori')renderPlayers();
+  if(t==='classifiche')renderClassifiche();
+  if(t==='analisi')renderAnalisi();
+  if(t==='fonti')renderFonti();
+  if(t==='datascience')renderDS();
+}
+ 
+// ============================================================
 // INIT
-document.addEventListener('DOMContentLoaded', ()=>{
-  renderGrid('matchesGrid', MATCHES);
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  // Date
+  const now=new Date();
+  $('dateBadge').textContent=now.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
+ 
+  // Render oggi immediately
+  renderGrid('matchesGrid',MATCHES_TODAY);
   buildTicker();
+ 
+  // Stats
+  $('cntOggi').textContent=MATCHES_TODAY.length;
+  $('cntAltaFiducia').textContent=MATCHES_TODAY.filter(m=>m.conf>=75).length;
+ 
+  // Update bar
+  setUpdState('ok',`Dati in bundle caricati · ${now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}`);
+  updateCountdown();
+  setInterval(updateCountdown,60000);
+ 
+  // Midnight refresh scheduler
+  scheduleMidnight();
+ 
+  // Live polling setup
+  if(isMatchTime()){
+    setTimeout(pollLive,5000);
+    _pollInterval=setInterval(pollLive,60000);
+  }else{
+    const chk=setInterval(()=>{
+      if(isMatchTime()&&!_pollInterval){
+        pollLive();
+        _pollInterval=setInterval(pollLive,60000);
+        clearInterval(chk);
+      }
+    },60000);
+  }
 });
 </script>
 </body>
 </html>
+ 
