@@ -2322,38 +2322,66 @@ function buildCard(m){
 // RENDER GRID
 // ============================================================
 // ============================================================
-// LIKE BUTTON — counter globale via CountAPI (tutti gli utenti)
+// LIKE BUTTON — counter GLOBALE tra tutti gli utenti
+// Usa 3 API in cascata: Abacus → CounterAPI → Fallback locale
 // ============================================================
-// CountAPI: gratuito, no auth, condiviso tra tutti gli IP
-// GET https://api.countapi.xyz/get/pronoapp-calcio/likes → legge
-// GET https://api.countapi.xyz/hit/pronoapp-calcio/likes → incrementa +1
 
-const COUNT_NAMESPACE = 'pronoapp-calcio';
-const COUNT_KEY       = 'likes-v1';
+const LIKE_APIS = [
+  // 1. Abacus — CORS aperto, free, affidabile
+  {
+    get: () => fetch('https://v2.jasoncameron.dev/abacus/get/pronoapp-calcio/likes-global', {cache:'no-cache'}),
+    hit: () => fetch('https://v2.jasoncameron.dev/abacus/hit/pronoapp-calcio/likes-global', {cache:'no-cache'}),
+    parse: d => d.value
+  },
+  // 2. CounterAPI.dev — alternativa free
+  {
+    get: () => fetch('https://api.counterapi.dev/v1/pronoapp-calcio/likes/get', {cache:'no-cache'}),
+    hit: () => fetch('https://api.counterapi.dev/v1/pronoapp-calcio/likes/up', {cache:'no-cache'}),
+    parse: d => d.value || d.count || 0
+  },
+];
+
+let _likeApiIdx = 0;  // indice API attiva
 
 function formatLikes(n){
-  if(n>=1000000) return (n/1000000).toFixed(1)+'M';
-  if(n>=1000)    return (n/1000).toFixed(1)+'k';
+  n = parseInt(n) || 0;
+  if(n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if(n >= 1000)    return (n/1000).toFixed(1)+'k';
   return String(n);
 }
 
 function setLikeDisplay(n){
-  const el=$('likeCount');
+  const el = $('likeCount');
   if(el) el.textContent = formatLikes(n);
 }
 
+// Tenta con API corrente, se fallisce prova la successiva
+async function likeApiFetch(type){
+  for(let i = _likeApiIdx; i < LIKE_APIS.length; i++){
+    try{
+      const res = await LIKE_APIS[i][type]();
+      if(!res.ok) continue;
+      const data = await res.json();
+      const val = LIKE_APIS[i].parse(data);
+      _likeApiIdx = i;  // ricorda l'API che funziona
+      return parseInt(val) || 0;
+    }catch(e){
+      console.warn('[Like] API '+i+' fallita:', e.message);
+    }
+  }
+  return null;  // tutte fallite
+}
+
 async function initLikes(){
-  try{
-    const res = await fetch(
-      'https://api.countapi.xyz/get/'+COUNT_NAMESPACE+'/'+COUNT_KEY,
-      {cache:'no-cache'}
-    );
-    if(!res.ok) return;
-    const data = await res.json();
-    if(data.value !== undefined) setLikeDisplay(data.value);
-  }catch(e){
-    // Silenzioso — mostra 0 se non disponibile
-    console.warn('[Like] CountAPI non raggiungibile:', e.message);
+  // Mostra subito il valore locale come placeholder
+  const local = parseInt(localStorage.getItem('pronoapp_likes_local') || '0');
+  if(local > 0) setLikeDisplay(local);
+
+  // Poi prende il valore globale reale
+  const val = await likeApiFetch('get');
+  if(val !== null){
+    setLikeDisplay(val);
+    localStorage.setItem('pronoapp_likes_local', String(val));
   }
 }
 
@@ -2361,43 +2389,40 @@ async function handleLike(){
   const wrap  = $('likeWrap');
   const heart = $('likeHeart');
 
-  // Feedback visivo immediato
-  if(heart) heart.textContent = '👍';
+  // ── Feedback visivo immediato ──
+  if(heart){ heart.textContent = '👍'; heart.style.transform = 'scale(1.4)'; }
   if(wrap)  wrap.classList.add('liked');
 
-  // Micro suono
+  // Micro suono click
   try{
     const ctx = getAudioCtx();
-    if(ctx){
+    if(ctx && ctx.state !== 'suspended'){
       const o=ctx.createOscillator(), g=ctx.createGain();
       o.connect(g); g.connect(ctx.destination);
       o.type='sine'; o.frequency.value=880;
-      g.gain.setValueAtTime(0.08,ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.12);
+      g.gain.setValueAtTime(0.08, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.12);
       o.start(ctx.currentTime); o.stop(ctx.currentTime+0.15);
     }
   }catch(e){}
 
-  // Incrementa su CountAPI (globale per tutti gli utenti)
-  try{
-    const res = await fetch(
-      'https://api.countapi.xyz/hit/'+COUNT_NAMESPACE+'/'+COUNT_KEY,
-      {cache:'no-cache'}
-    );
-    if(res.ok){
-      const data = await res.json();
-      if(data.value !== undefined) setLikeDisplay(data.value);
-    }
-  }catch(e){
-    console.warn('[Like] Errore incremento:', e.message);
-    // Incremento locale come fallback
-    const cur = parseInt($('likeCount').textContent.replace(/[km]/i,'')||'0');
-    setLikeDisplay(cur+1);
+  // ── Incrementa globale ──
+  const newVal = await likeApiFetch('hit');
+  if(newVal !== null){
+    setLikeDisplay(newVal);
+    localStorage.setItem('pronoapp_likes_local', String(newVal));
+  } else {
+    // Tutte le API offline → incremento locale come fallback
+    const cur = parseInt(localStorage.getItem('pronoapp_likes_local') || '0');
+    const upd = cur + 1;
+    localStorage.setItem('pronoapp_likes_local', String(upd));
+    setLikeDisplay(upd);
+    console.warn('[Like] Tutte le API offline — solo locale');
   }
 
-  // Torna a pollicione vuoto dopo 1s (permette re-click)
+  // Torna normale dopo 900ms (permette re-click)
   setTimeout(()=>{
-    if(heart) heart.textContent = '👍';
+    if(heart){ heart.textContent = '👍'; heart.style.transform = ''; }
     if(wrap)  wrap.classList.remove('liked');
   }, 900);
 }
