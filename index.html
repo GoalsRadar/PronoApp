@@ -1369,7 +1369,7 @@ main{
     <div class="live-open-wrap">
       <div class="live-open-icon">🔴</div>
       <div class="live-open-title">Risultati Live</div>
-      <div class="live-open-sub">Clicca per aprire i risultati in diretta su Flashscore.it</div>
+      <div class="live-open-sub">Apri Flashscore per seguire le partite live · i gol vengono rilevati automaticamente</div>
       <a class="live-open-btn"
          href="https://www.flashscore.it"
          target="_blank" rel="noopener">
@@ -2363,7 +2363,7 @@ function liveTickUpdate(){
   const now = new Date();
   const timeStr = now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   const el = $('liveUpdateTime');
-  if(el) el.textContent = 'Live · ' + timeStr;
+  if(el) el.textContent = 'Live · ' + timeStr + ' · TheSportsDB';
 
   // ── 2. Tenta lettura DOM iframe (funziona solo se same-origin) ──
   try{
@@ -2384,37 +2384,7 @@ function liveTickUpdate(){
   if(_liveTickCount % 30 === 0) refreshLiveIframe();
 }
 
-function refreshLiveIframe(){
-  const fr = $('scoreMerFrame');
-  if(!fr) return;
-  const src = fr.src;
-  fr.src = '';
-  setTimeout(()=>{ fr.src = src; }, 100);
-}
-
 // ── Parsing testo per rilevare gol ──
-function detectGoalsFromText(newText, oldText){
-  const scoreRe = /(\d+)\s*[-–]\s*(\d+)/g;
-  const oldScores = [...oldText.matchAll(scoreRe)].map(m=>[+m[1],+m[2]]);
-  const newScores = [...newText.matchAll(scoreRe)].map(m=>[+m[1],+m[2]]);
-
-  newScores.forEach((ns,i)=>{
-    if(!oldScores[i]) return;
-    const [oh,oa]=oldScores[i], [nh,na]=ns;
-    if(nh>oh || na>oa){
-      // Cerca nome squadra nel testo vicino al punteggio
-      const lines = newText.split('\n').map(l=>l.trim()).filter(Boolean);
-      const si = lines.findIndex(l=>l.match(/\d+\s*[-–]\s*\d+/));
-      const team = (nh>oh)
-        ? (si>0 ? lines[si-1] : 'Squadra Casa')
-        : (si>=0 && si<lines.length-1 ? lines[si+1] : 'Squadra Ospite');
-      console.log('[GOL rilevato dal DOM]', team, nh+'-'+na);
-      triggerGoalBanner(team, nh+'-'+na);
-    }
-  });
-}
-
-
 // ── Ascolta messaggi postMessage dall iframe ScoreMer ──
 window.addEventListener('message', function(e){
   if(!e.data) return;
@@ -2439,125 +2409,100 @@ window.addEventListener('message', function(e){
 });
 
 // Avvia il live polling ogni 10 secondi
-// ── Stato punteggi tracciati ──
-const _trackedScores = {};  // { "HomeVsAway": "1-0" }
-let _goalCooldown = false;  // evita banner multipli in rapida successione
+// ══════════════════════════════════════════════════════
+// LIVE GOL ENGINE — TheSportsDB API (gratuita, no key)
+// Polling ogni 30s: confronta punteggi, banner se gol
+// ══════════════════════════════════════════════════════
+
+const _trackedScores = {};  // { matchId: "1-0" }
+let   _goalCooldown  = false;
 
 function triggerGoalBanner(teamName, score){
   if(_goalCooldown) return;
   _goalCooldown = true;
-  setTimeout(()=>{ _goalCooldown = false; }, 8000); // cooldown 8s
-  showGoalBanner(teamName, score ? '⚽ ' + score : null);
+  setTimeout(()=>{ _goalCooldown = false; }, 9000);
+  showGoalBanner(teamName, score || null);
 }
 
-// ── FETCH PUNTEGGI da ScoreMer (stessa URL del widget) ──
-// ScoreMer espone un endpoint JSON per i risultati live.
-// Proviamo a fetch i dati raw e confrontiamo con lo stato precedente.
+// TheSportsDB: partite live/oggi
 async function fetchLiveScores(){
-  const leagueIds = '35,36,37,38,39,117,128,40,108';
-  const endpoints = [
-    'https://www.scoremer.com/api/live?lid='+leagueIds+'&lang=it',
-    'https://www.scoremer.com/widgets/live-data?lid='+leagueIds,
-  ];
+  const d = new Date();
+  const dateStr = d.getFullYear()+'-'
+    +String(d.getMonth()+1).padStart(2,'0')+'-'
+    +String(d.getDate()).padStart(2,'0');
 
-  for(const url of endpoints){
-    try{
-      const res = await fetch(url, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json, text/plain, */*' },
-        cache: 'no-cache',
-      });
-      if(!res.ok) continue;
-      const ct = res.headers.get('content-type') || '';
+  // TheSportsDB API v1 — gratuita, CORS aperto
+  const url = 'https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d='+dateStr+'&s=Soccer';
 
-      if(ct.includes('json')){
-        const data = await res.json();
-        parseScoreMerJSON(data);
-        return;
-      } else {
-        const text = await res.text();
-        parseScoreMerHTML(text);
+  try{
+    const res = await fetch(url, { cache:'no-cache' });
+    if(!res.ok) return;
+    const data = await res.json();
+    const events = data.events || [];
+    if(!events.length) return;
+
+    events.forEach(ev => {
+      if(!ev.idEvent) return;
+      const id    = ev.idEvent;
+      const home  = ev.strHomeTeam  || '';
+      const away  = ev.strAwayTeam  || '';
+      const hGoal = ev.intHomeScore;
+      const aGoal = ev.intAwayScore;
+
+      // Solo partite in corso o finite con punteggio valido
+      if(hGoal === null || hGoal === '' || hGoal === undefined) return;
+
+      const newScore = hGoal + '-' + aGoal;
+      const prev     = _trackedScores[id];
+
+      if(prev === undefined){
+        // Prima lettura — inizializza senza banner
+        _trackedScores[id] = newScore;
         return;
       }
-    } catch(e){
-      // CORS o endpoint non disponibile — prossimo tentativo
-      continue;
-    }
-  }
-}
+      if(prev === newScore) return;  // nessun cambiamento
 
-function parseScoreMerJSON(data){
-  // Gestisce diversi formati JSON di ScoreMer
-  const matches = data.matches || data.games || data.events || data.data || [];
-  if(!Array.isArray(matches)) return;
-  matches.forEach(m=>{
-    const home  = m.home_team || m.home || m.team1 || '';
-    const away  = m.away_team || m.away || m.team2 || '';
-    const score = (m.score || m.result || (m.home_score+'-'+m.away_score) || '').toString();
-    const key   = home + 'v' + away;
-    if(!home || !away || !score.match(/\d+-\d+/)) return;
-    checkScoreChange(key, score, home, away);
-  });
-}
+      // ── PUNTEGGIO CAMBIATO ──
+      const [ph, pa] = prev.split('-').map(Number);
+      const [nh, na] = newScore.split('-').map(Number);
+      _trackedScores[id] = newScore;
 
-function parseScoreMerHTML(html){
-  // Estrae punteggi dall'HTML del widget
-  const scoreRe = /<[^>]*class="[^"]*score[^"]*"[^>]*>\s*(\d+)\s*[-–:]\s*(\d+)\s*</gi;
-  const teamRe  = /<[^>]*class="[^"]*team[^"]*"[^>]*>([^<]{2,30})</gi;
-  const scores  = [...html.matchAll(scoreRe)];
-  const teams   = [...html.matchAll(teamRe)].map(m=>m[1].trim());
-  scores.forEach((s,i)=>{
-    const home  = teams[i*2]   || 'Casa';
-    const away  = teams[i*2+1] || 'Ospite';
-    const score = s[1]+'-'+s[2];
-    const key   = home+'v'+away;
-    checkScoreChange(key, score, home, away);
-  });
-}
+      if(nh > ph){
+        console.log('[GOL]', home, nh+'-'+na);
+        triggerGoalBanner(home, nh+'-'+na);
+      } else if(na > pa){
+        console.log('[GOL]', away, nh+'-'+na);
+        triggerGoalBanner(away, nh+'-'+na);
+      }
 
-function checkScoreChange(key, newScore, home, away){
-  const prev = _trackedScores[key];
-  if(prev === undefined){
-    // Prima lettura — salva senza banner
-    _trackedScores[key] = newScore;
-    return;
-  }
-  if(prev === newScore) return; // Nessun cambiamento
+      // Aggiorna timestamp
+      const el = $('liveUpdateTime');
+      if(el) el.textContent = 'Live ↻ '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    });
 
-  // CAMBIAMENTO RILEVATO
-  const [ph,pa] = prev.split('-').map(Number);
-  const [nh,na] = newScore.split('-').map(Number);
-  _trackedScores[key] = newScore;
-
-  if(nh > ph){
-    console.log('[GOL API]', home, newScore);
-    triggerGoalBanner(home, newScore);
-  } else if(na > pa){
-    console.log('[GOL API]', away, newScore);
-    triggerGoalBanner(away, newScore);
-  } else {
-    // Aggiornamento non-gol (cambio status ecc)
-    const el = $('liveUpdateTime');
-    if(el) el.textContent = 'Live ↻ ' + new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }catch(e){
+    console.warn('[LIVE] fetchLiveScores:', e.message);
   }
 }
 
 function startLiveGoalPolling(){
   if(_livePolling) return;
-  console.log('[LIVE] Polling avviato — ogni 10s');
-
-  // Primo fetch immediato per inizializzare i punteggi
-  fetchLiveScores();
+  console.log('[LIVE] Polling avviato — TheSportsDB ogni 30s');
+  fetchLiveScores();          // primo fetch immediato
   liveTickUpdate();
-
-  _livePolling = setInterval(async ()=>{
+  _livePolling = setInterval(async()=>{
     liveTickUpdate();
     await fetchLiveScores();
-  }, 10000);
+  }, 30000);
 }
 
-// checkLiveGoals compatibility shim
-function checkLiveGoals(){ liveTickUpdate(); }
+// checkLiveGoals shim
+function checkLiveGoals(){ fetchLiveScores(); }
+
+// testGoal globale
+window.showGoalBanner  = showGoalBanner;
+window.triggerGoalBanner = triggerGoalBanner;
+window.testGoal = (team, score) => triggerGoalBanner(team||'Inter', score||'2-1');
 
 // ── MutationObserver: monitora cambiamenti DOM nell iframe in tempo reale ──
 let _iframeObserver = null;
@@ -3228,7 +3173,6 @@ function switchTab(t){
     if(el)el.textContent='Live · '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     startLiveGoalPolling();
     setTimeout(installIframeObserver, 1500);
-    checkIframeLoaded();
   }
 }
 function reloadLiveWidget(){
