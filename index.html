@@ -110,33 +110,44 @@ body::after{
   display:flex;align-items:center;justify-content:center;
   position:relative;
   transform-style:preserve-3d;
-  transition:transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s;
+  transition:transform .6s cubic-bezier(.4,0,.2,1), box-shadow .4s;
   box-shadow:
     0 0 0 1px rgba(0,240,192,.18),
     0 4px 16px rgba(0,0,0,.5),
     0 0 24px rgba(0,212,160,.1),
-    inset 0 1px 0 rgba(255,255,255,.06),
-    inset 0 0 12px rgba(0,240,192,.04);
-}
-.logo-icon::before{
-  content:'';position:absolute;inset:0;border-radius:11px;
-  background:linear-gradient(135deg,rgba(0,255,224,.1) 0%,transparent 55%);
-  pointer-events:none;
+    inset 0 1px 0 rgba(255,255,255,.06);
 }
 .logo-icon::after{
   content:'';position:absolute;
   bottom:-8px;left:50%;transform:translateX(-50%);
   width:20px;height:5px;
   background:radial-gradient(ellipse,rgba(0,240,192,.35),transparent 70%);
-  filter:blur(4px);border-radius:50%;
+  filter:blur(4px);border-radius:50%;pointer-events:none;
 }
-.logo:hover .logo-icon{
-  transform:rotateX(6deg) rotateY(-10deg) scale(1.1) translateY(-3px);
+.logo-icon.flipped{
+  transform:rotateY(180deg);
+  box-shadow:
+    0 0 0 1px rgba(255,184,0,.35),
+    0 8px 24px rgba(0,0,0,.5),
+    0 0 32px rgba(255,184,0,.2);
+}
+.logo-face{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:11px;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+}
+.logo-front{ transform:rotateY(0deg); }
+.logo-back{
+  transform:rotateY(180deg);
+  background:linear-gradient(145deg,#1a1200,#2a1e00);
+}
+.logo:hover .logo-icon:not(.flipped){
   box-shadow:
     0 0 0 1px rgba(0,240,192,.35),
-    0 16px 36px rgba(0,0,0,.55),
-    0 0 36px rgba(0,212,160,.2),
-    inset 0 1px 0 rgba(255,255,255,.1);
+    0 12px 28px rgba(0,0,0,.55),
+    0 0 28px rgba(0,212,160,.2);
 }
 .logo-text{
   font-family:var(--font-head);
@@ -1397,35 +1408,35 @@ main{
 <!-- ═══ TOPBAR ═══ -->
 <header class="topbar">
   <a class="logo" onclick="switchTab('oggi')">
-    <div class="logo-icon" id="logoIcon">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="lg1" x1="2" y1="20" x2="22" y2="2" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#00d4a0"/>
-            <stop offset="100%" stop-color="#00ffe0"/>
-          </linearGradient>
-          <linearGradient id="lg2" x1="2" y1="20" x2="22" y2="2" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="rgba(0,212,160,.25)"/>
-            <stop offset="100%" stop-color="rgba(0,255,224,.0)"/>
-          </linearGradient>
-          <filter id="glo" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="1.5" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <!-- Area fill under the arrow line -->
-        <path d="M3 19 L7 14 L11 16 L16 9 L20 4 L20 20 Z" fill="url(#lg2)"/>
-        <!-- Chart line: rising from bottom-left to top-right with a dip -->
-        <polyline points="3,19 7,14 11,16 16,9 20,4"
-          stroke="url(#lg1)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
-          fill="none" filter="url(#glo)"/>
-        <!-- Arrowhead at the top-right end -->
-        <polyline points="15,3 20,4 19,9"
-          stroke="url(#lg1)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
-          fill="none" filter="url(#glo)"/>
-        <!-- Dot at peak -->
-        <circle cx="20" cy="4" r="2" fill="#00ffe0" opacity="0.9"/>
-      </svg>
+    <div class="logo-icon" id="logoIcon" onclick="spinLogo()" style="cursor:pointer;position:relative;">
+      <!-- Fronte: freccia grafico -->
+      <div class="logo-face logo-front">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lg1" x1="2" y1="20" x2="22" y2="2" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#00d4a0"/>
+              <stop offset="100%" stop-color="#00ffe0"/>
+            </linearGradient>
+            <linearGradient id="lg2" x1="2" y1="20" x2="22" y2="2" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="rgba(0,212,160,.25)"/>
+              <stop offset="100%" stop-color="rgba(0,255,224,.0)"/>
+            </linearGradient>
+            <filter id="glo" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="1.5" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <path d="M3 19 L7 14 L11 16 L16 9 L20 4 L20 20 Z" fill="url(#lg2)"/>
+          <polyline points="3,19 7,14 11,16 16,9 20,4" stroke="url(#lg1)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#glo)"/>
+          <polyline points="15,3 20,4 19,9" stroke="url(#lg1)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#glo)"/>
+          <circle cx="20" cy="4" r="2" fill="#00ffe0" opacity="0.9"/>
+        </svg>
+      </div>
+      <!-- Retro: simbolo $ -->
+      <div class="logo-face logo-back">
+        <span style="font-family:var(--font-head);font-size:26px;letter-spacing:-.02em;
+          color:#00ff88;text-shadow:0 0 12px #00ff88,0 0 30px #00ff88,0 0 60px #00e070;line-height:1;">$</span>
+      </div>
     </div>
     <div>
       <div class="logo-text">PRONOapp</div>
@@ -1803,6 +1814,38 @@ const TEAM_COLORS = {
 };
 
 function $(id){return document.getElementById(id);}
+
+// ── SPIN LOGO — flip fronte/retro al click ──
+let _logoFlipped = false;
+let _logoSpinTimer = null;
+function spinLogo(){
+  const icon = document.getElementById('logoIcon');
+  if(!icon) return;
+  _logoFlipped = !_logoFlipped;
+  icon.classList.toggle('flipped', _logoFlipped);
+  // Micro suono
+  try{
+    const ctx = getAudioCtx();
+    if(ctx && ctx.state !== 'suspended'){
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type='sine';
+      o.frequency.setValueAtTime(_logoFlipped?600:400, ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(_logoFlipped?1200:200, ctx.currentTime+0.15);
+      g.gain.setValueAtTime(0.07, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.2);
+      o.start(ctx.currentTime); o.stop(ctx.currentTime+0.25);
+    }
+  }catch(e){}
+  // Torna automaticamente al fronte dopo 3s
+  clearTimeout(_logoSpinTimer);
+  if(_logoFlipped){
+    _logoSpinTimer = setTimeout(()=>{
+      _logoFlipped = false;
+      icon.classList.remove('flipped');
+    }, 3000);
+  }
+}
 
 // ── NOME SQUADRA 3D con colori del club ──
 function teamName3D(name){
@@ -2303,8 +2346,7 @@ function buildCard(m){
           +'<div class="prono-val">'+m.prono+'</div>'
         +'</div>'
         +'<div style="text-align:right">'
-          +'<div class="quota-pill">q'+m.quota+'</div>'
-          +'<div style="margin-top:6px;display:flex;align-items:center;gap:4px;justify-content:flex-end">'
+                    +'<div style="margin-top:6px;display:flex;align-items:center;gap:4px;justify-content:flex-end">'
             +'<div class="conf-dots">'+confDots+'</div>'
             +'<span style="font-family:var(--font-mono);font-size:10px;color:'+confColor+'">'+m.conf+'%</span>'
           +'</div>'
@@ -3351,7 +3393,7 @@ function sendAI(inputId,msgsId){
 
   if(m){
     reply='<strong>'+m.home+' vs '+m.away+'</strong> · '+m.compLabel+' · '+m.slot+'<br><br>'
-      +'🎯 <strong>Pronostico:</strong> '+m.prono+' @ q'+m.quota+' ('+m.conf+'% fiducia)<br>'
+      +'🎯 <strong>Pronostico:</strong> '+m.prono+' ('+m.conf+'% fiducia)<br>'
       +'📊 <strong>xG attesi:</strong> '+m.xg_home+' – '+m.xg_away+'<br>'
       +'📈 <strong>Over 2.5:</strong> '+m.over25+'% · <strong>GG:</strong> '+m.btts+'%<br><br>'
       +'🔍 <strong>Analisi:</strong> '+m.analysis+'<br><br>'
@@ -3362,32 +3404,30 @@ function sendAI(inputId,msgsId){
       +m.sources.filter(s=>s.a==='agree').map(s=>s.n).join(', ');
   } else if(ql.includes('top')||ql.includes('miglio')||ql.includes('best')||ql.includes('pick')){
     reply='🎯 <strong>TOP PICK oggi:</strong><br><br>'
-      +'<strong>'+a.topPick.match+'</strong><br>'+a.topPick.bet+' @ q'+a.topPick.quota
-      +' — '+a.topPick.reason+'<br><br>'
-      +'💰 <strong>Valore:</strong> '+a.value.match+'<br>'+a.value.bet+' @ q'+a.value.quota+' — '+a.value.reason+'<br><br>'
-      +'🎲 <strong>Multipla AI:</strong> '+a.multipla.picks+' @ q'+a.multipla.quota+' — '+a.multipla.note;
+      +'<strong>'+a.topPick.match+'</strong><br>'+a.topPick.bet+' — '+a.topPick.reason+'<br><br>'
+      +'💰 <strong>Valore:</strong> '+a.value.match+'<br>'+a.value.bet+' — '+a.value.reason+'<br><br>'
+      +'🎲 <strong>Multipla AI:</strong> '+a.multipla.picks+' — '+a.multipla.note;
   } else if(ql.includes('risult')||ql.includes('exact')||ql.includes('esatt')){
     reply='📋 <strong>Risultati esatti previsti:</strong><br><br>'
       +MATCHES_TODAY.map(x=>'• <strong>'+x.home+' vs '+x.away+':</strong> '+x.risultato_esatto).join('<br>');
   } else if(ql.includes('invest')||ql.includes('scommett')||ql.includes('piazza')){
     reply='💰 <strong>Dove investire oggi:</strong><br><br>'
       +a.domande.scommesse_migliori.split('\n').join('<br>')+'<br><br>'
-      +'🎲 <strong>Multipla consigliata:</strong> '+a.multipla.picks+' @ q'+a.multipla.quota;
+      +'🎲 <strong>Multipla consigliata:</strong> '+a.multipla.picks+' — '+a.multipla.note;
   } else if(ql.includes('multipla')||ql.includes('combin')){
     reply='🎲 <strong>Multipla AI consigliata:</strong><br><br>'
       +'<strong>'+a.multipla.picks+'</strong><br>'
-      +'Quota combinata: q<strong>'+a.multipla.quota+'</strong><br>'
-      +'Confidenza: '+a.multipla.conf+'%<br>'
+            +'Confidenza: '+a.multipla.conf+'%<br>'
       +a.multipla.note;
   } else if(ql.includes('partite')||ql.includes('oggi')||ql.includes('program')){
     reply='📅 <strong>Partite di oggi:</strong><br><br>'
-      +MATCHES_TODAY.map(x=>'⚽ <strong>'+x.home+' vs '+x.away+'</strong> — '+x.compLabel+' '+x.slot+'<br>→ '+x.prono+' @ q'+x.quota+' ('+x.conf+'%)<br><small>'+x.info+'</small>').join('<br><br>');
+      +MATCHES_TODAY.map(x=>'⚽ <strong>'+x.home+' vs '+x.away+'</strong> — '+x.compLabel+' '+x.slot+'<br>→ '+x.prono+' ('+x.conf+'%)<br><small>'+x.info+'</small>').join('<br><br>');
   } else {
     reply='📊 <strong>Riepilogo AI — '+new Date().toLocaleDateString('it-IT',{day:'numeric',month:'long'})+':</strong><br><br>'
       +'Oggi ho analizzato <strong>'+MATCHES_TODAY.length+' partite</strong> da 63 fonti.<br><br>'
-      +'🎯 Top Pick: <strong>'+a.topPick.match+'</strong> — '+a.topPick.bet+' @ q'+a.topPick.quota+'<br>'
-      +'💰 Valore: <strong>'+a.value.match+'</strong> — '+a.value.bet+' @ q'+a.value.quota+'<br>'
-      +'🎲 Multipla: '+a.multipla.picks+' @ q'+a.multipla.quota+'<br><br>'
+      +'🎯 Top Pick: <strong>'+a.topPick.match+'</strong> — '+a.topPick.bet+'<br>'
+      +'💰 Valore: <strong>'+a.value.match+'</strong> — '+a.value.bet+'<br>'
+      +'🎲 Multipla: '+a.multipla.picks+'<br><br>'
       +'Chiedimi: "analisi Bayern", "risultati esatti", "dove investire", "multipla"';
   }
   addMsg(msgsId,'bot',reply);
@@ -3408,7 +3448,7 @@ function renderAnalisi(data){
     '<div class="ai-pick-card '+p.cls+'">'
     +'<div class="pick-label" style="color:'+p.color+'">'+p.label+'</div>'
     +'<div class="pick-match">'+p.d.match+'</div>'
-    +'<div class="pick-bet" style="color:'+p.color+'">'+p.d.bet+' <small style="font-size:13px">@ q'+p.d.quota+'</small></div>'
+    +'<div class="pick-bet" style="color:'+p.color+'">'+p.d.bet+' <small style="font-size:13px">@ q'+p.d.quota+'</div>'
     +'<div class="pick-reason">'+p.d.reason+'</div>'
     +'</div>'
   ).join('');
