@@ -3768,6 +3768,13 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   // ── Avvia live polling ogni 10s (anche se non si è sul tab Live) ──
   startLiveGoalPolling();
+
+  // ── Aggiorna affidabilità ogni 30 minuti ──
+  setInterval(()=>{
+    const tab = document.getElementById('tab-risultati');
+    if(tab && tab.classList.contains('active')) renderRisultati();
+    console.log('[Affidabilità] aggiornamento automatico');
+  }, 30 * 60 * 1000);
 });
 </script>
 </body>
