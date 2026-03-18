@@ -2211,65 +2211,114 @@ function msToNextMidnight(){
 let _goalBannerTimer = null;
 let _audioCtx = null;
 
+let _audioUnlocked = false;
 function getAudioCtx(){
   if(!_audioCtx){
     try{ _audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
   }
   return _audioCtx;
 }
+// Sblocca audio al primo tocco/click (browser autoplay policy)
+function unlockAudio(){
+  if(_audioUnlocked) return;
+  const ctx = getAudioCtx();
+  if(ctx && ctx.state === 'suspended'){
+    ctx.resume().then(()=>{
+      _audioUnlocked = true;
+      console.log('[Audio] sbloccato');
+    });
+  } else {
+    _audioUnlocked = true;
+  }
+}
+document.addEventListener('click',  unlockAudio, {once:false, passive:true});
+document.addEventListener('touchstart', unlockAudio, {once:false, passive:true});
+document.addEventListener('keydown', unlockAudio, {once:false, passive:true});
 
 function playGoalSound(){
   const ctx = getAudioCtx(); if(!ctx) return;
-  // Stadium crowd roar + whistle effect using Web Audio API
+  // Resume se sospeso (autoplay policy browser)
+  if(ctx.state === 'suspended'){ ctx.resume(); }
   const t = ctx.currentTime;
+  const master = ctx.createGain();
+  master.gain.value = 0.7;
+  master.connect(ctx.destination);
 
-  // Fanfare: ascending notes
-  const notes = [261.6, 329.6, 392.0, 523.3, 659.3, 783.9];
-  notes.forEach((freq, i) => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(freq, t + i * 0.08);
-    gain.gain.setValueAtTime(0, t + i * 0.08);
-    gain.gain.linearRampToValueAtTime(0.18, t + i * 0.08 + 0.04);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.08 + 0.35);
-    osc.start(t + i * 0.08);
-    osc.stop(t + i * 0.08 + 0.4);
+  // ── 1. BOATO FOLLA: rumore bianco con envelope da stadio ──
+  const crowdDur = 3.5;
+  const crowdBuf = ctx.createBuffer(1, ctx.sampleRate * crowdDur, ctx.sampleRate);
+  const cd = crowdBuf.getChannelData(0);
+  for(let i=0;i<cd.length;i++) cd[i]=(Math.random()*2-1);
+  const crowd = ctx.createBufferSource();
+  crowd.buffer = crowdBuf;
+  const crowdFilter = ctx.createBiquadFilter();
+  crowdFilter.type = 'bandpass';
+  crowdFilter.frequency.value = 800;
+  crowdFilter.Q.value = 0.5;
+  const crowdGain = ctx.createGain();
+  crowdGain.gain.setValueAtTime(0, t);
+  crowdGain.gain.linearRampToValueAtTime(0.5, t+0.15);
+  crowdGain.gain.linearRampToValueAtTime(0.7, t+0.6);
+  crowdGain.gain.linearRampToValueAtTime(0.4, t+2.0);
+  crowdGain.gain.exponentialRampToValueAtTime(0.001, t+crowdDur);
+  crowd.connect(crowdFilter);
+  crowdFilter.connect(crowdGain);
+  crowdGain.connect(master);
+  crowd.start(t); crowd.stop(t+crowdDur);
+
+  // ── 2. FANFARA GOL: accordo trionfante (DO-MI-SOL-DO8) ──
+  const fanfare = [
+    {f:261.6, start:0,    dur:0.45, vol:0.30},  // DO
+    {f:329.6, start:0.05, dur:0.40, vol:0.28},  // MI
+    {f:392.0, start:0.10, dur:0.40, vol:0.26},  // SOL
+    {f:523.3, start:0,    dur:0.55, vol:0.32},  // DO8
+    // Secondo accordo più alto
+    {f:523.3, start:0.55, dur:0.35, vol:0.28},
+    {f:659.3, start:0.60, dur:0.35, vol:0.26},
+    {f:783.9, start:0.65, dur:0.35, vol:0.24},
+    {f:1046.5,start:0.55, dur:0.45, vol:0.30},
+  ];
+  fanfare.forEach(n=>{
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    const dist = ctx.createWaveShaper();
+    // Leggera distorsione per suono più "pieno"
+    const curve = new Float32Array(256);
+    for(let i=0;i<256;i++){ const x=i*2/256-1; curve[i]=x<0?-Math.pow(-x,.8):Math.pow(x,.8); }
+    dist.curve = curve;
+    o.type = 'triangle';
+    o.frequency.value = n.f;
+    g.gain.setValueAtTime(0, t+n.start);
+    g.gain.linearRampToValueAtTime(n.vol, t+n.start+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, t+n.start+n.dur);
+    o.connect(dist); dist.connect(g); g.connect(master);
+    o.start(t+n.start); o.stop(t+n.start+n.dur+0.05);
   });
 
-  // Crowd cheer: white noise burst
-  const bufSize = ctx.sampleRate * 1.5;
-  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-  const data = buf.getChannelData(0);
-  for(let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * 0.12;
-  const noise = ctx.createBufferSource();
-  noise.buffer = buf;
-  const noiseGain = ctx.createGain();
-  noiseGain.gain.setValueAtTime(0, t);
-  noiseGain.gain.linearRampToValueAtTime(0.35, t + 0.1);
-  noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
-  // Bandpass to shape crowd sound
-  const filter = ctx.createBiquadFilter();
-  filter.type = 'bandpass';
-  filter.frequency.value = 1200;
-  filter.Q.value = 0.8;
-  noise.connect(filter); filter.connect(noiseGain); noiseGain.connect(ctx.destination);
-  noise.start(t);
-  noise.stop(t + 1.5);
+  // ── 3. FISCHIO ARBITRO: tre colpi brevi ──
+  [0.9, 1.1, 1.3].forEach((delay, i)=>{
+    const w = ctx.createOscillator();
+    const wg = ctx.createGain();
+    w.type = 'sine';
+    w.frequency.setValueAtTime(3400-i*100, t+delay);
+    w.frequency.linearRampToValueAtTime(2900-i*80, t+delay+0.18);
+    wg.gain.setValueAtTime(0, t+delay);
+    wg.gain.linearRampToValueAtTime(0.18, t+delay+0.02);
+    wg.gain.exponentialRampToValueAtTime(0.001, t+delay+0.2);
+    w.connect(wg); wg.connect(master);
+    w.start(t+delay); w.stop(t+delay+0.25);
+  });
 
-  // Whistle: high freq sine
-  const whistle = ctx.createOscillator();
-  const wGain = ctx.createGain();
-  whistle.connect(wGain); wGain.connect(ctx.destination);
-  whistle.type = 'sine';
-  whistle.frequency.setValueAtTime(3200, t + 0.5);
-  whistle.frequency.linearRampToValueAtTime(2800, t + 1.2);
-  wGain.gain.setValueAtTime(0, t + 0.5);
-  wGain.gain.linearRampToValueAtTime(0.15, t + 0.55);
-  wGain.gain.exponentialRampToValueAtTime(0.001, t + 1.3);
-  whistle.start(t + 0.5);
-  whistle.stop(t + 1.4);
+  // ── 4. BASSO BOOM: punch iniziale ──
+  const boom = ctx.createOscillator();
+  const boomGain = ctx.createGain();
+  boom.type = 'sine';
+  boom.frequency.setValueAtTime(120, t);
+  boom.frequency.exponentialRampToValueAtTime(40, t+0.3);
+  boomGain.gain.setValueAtTime(0.6, t);
+  boomGain.gain.exponentialRampToValueAtTime(0.001, t+0.35);
+  boom.connect(boomGain); boomGain.connect(master);
+  boom.start(t); boom.stop(t+0.4);
 }
 
 function spawnConfetti(){
@@ -2292,7 +2341,8 @@ function spawnConfetti(){
 }
 
 function showGoalBanner(teamName, scorerName){
-  // Resume audio context if suspended (browser autoplay policy)
+  // Sblocca e resume audio context
+  unlockAudio();
   const ctx = getAudioCtx();
   if(ctx && ctx.state === 'suspended') ctx.resume();
 
