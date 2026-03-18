@@ -1,4 +1,22 @@
 <!DOCTYPE html>
+<!-- 
+  PRONOapp — Deploy su GitHub Pages
+  ══════════════════════════════════
+  Per il corretto funzionamento su GitHub Pages:
+  
+  1. Crea il file _config.yml nella root con:
+     include: ["PRONOapp.html"]
+  
+  2. Crea il file _headers (per Netlify/Cloudflare) o usa GitHub Pages:
+     /*
+       X-Frame-Options: ALLOWALL
+       Content-Security-Policy: frame-ancestors *
+  
+  3. Il widget ScoreMer richiede che il sito sia su HTTPS (GitHub Pages lo è).
+  
+  4. Se il widget non si carica, clicca "⚽ Risultati Live · Flashscore ↗" per aprirlo
+     direttamente su ScoreMer in una nuova scheda.
+-->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -949,6 +967,53 @@ main{
   .upd-next{display:none;}
 }
 
+/* ═══ LIVE OPEN WRAP ═══ */
+.live-open-wrap{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 24px;text-align:center;
+  min-height:320px;
+  position:relative;
+}
+.live-open-icon{
+  font-size:52px;margin-bottom:16px;
+  animation:livePulse 1.4s ease-in-out infinite;
+}
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.7;transform:scale(1.08);}}
+.live-open-title{
+  font-family:var(--font-head);font-size:32px;letter-spacing:.1em;
+  color:var(--accent3);
+  text-shadow:0 0 24px rgba(255,77,109,.5);
+  margin-bottom:8px;
+}
+.live-open-sub{
+  font-size:13px;color:var(--text3);margin-bottom:28px;
+  font-family:var(--font-mono);
+}
+.live-open-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,#c0000a,#ff3348);
+  color:#fff;text-decoration:none;
+  padding:14px 32px;border-radius:12px;
+  font-family:var(--font-head);font-size:18px;letter-spacing:.08em;
+  box-shadow:0 4px 24px rgba(255,50,72,.35),0 0 0 1px rgba(255,100,120,.2);
+  transition:transform .2s,box-shadow .2s;
+  margin-bottom:32px;
+}
+.live-open-btn:hover{
+  transform:translateY(-3px) scale(1.03);
+  box-shadow:0 8px 32px rgba(255,50,72,.5),0 0 0 1px rgba(255,120,140,.3);
+}
+.live-open-btn:active{transform:translateY(0) scale(.98);}
+.live-leagues{
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+  max-width:440px;
+}
+.live-leagues span{
+  font-family:var(--font-mono);font-size:10px;color:var(--text3);
+  background:var(--bg3);border:1px solid var(--border);
+  padding:4px 10px;border-radius:6px;letter-spacing:.04em;
+}
+
 /* ═══ RISULTATI TAB ═══ */
 .risultati-hero{
   background:linear-gradient(135deg,rgba(79,127,255,.08),rgba(0,240,192,.05));
@@ -1113,6 +1178,15 @@ main{
 .match-card:nth-child(5){animation-delay:.22s;}
 .match-card:nth-child(6){animation-delay:.27s;}
 </style>
+  <!-- Permette iframe di terze parti su GitHub Pages -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self' 'unsafe-inline' 'unsafe-eval' https:;
+    frame-src https://www.scoremer.com https://scoremer.com *;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;
+    connect-src 'self' https:;
+    img-src 'self' data: https:;
+    style-src 'self' 'unsafe-inline' https:;
+  ">
 </head>
 <body>
 <div id="progBar"></div>
@@ -1281,13 +1355,9 @@ main{
     <div class="live-topbar-right">
       <span class="live-upd-badge" id="liveUpdateTime">—</span>
       <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-family:var(--font-mono);font-size:10px;color:var(--accent);opacity:.8">
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text3);opacity:.7">
           ↻ aggiorn. ogni 10s
         </span>
-        <button class="live-reload-btn" onclick="reloadLiveWidget()">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12 7A5 5 0 1 1 7 2v2L11 0l-4 0v2A5 5 0 0 0 12 7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          Forza refresh
-        </button>
       </div>
     </div>
   </div>
@@ -1295,12 +1365,29 @@ main{
   <!-- IFRAME WIDGET -->
   <div class="live-widget-shell">
     <div class="live-widget-glow-top"></div>
-    <iframe id="scoreMerFrame"
-      class="live-iframe"
-      src="https://www.scoremer.com/widgets/live?lid=35,36,37,38,39,117,128,40,108&c=d00b0d&f=FFF&lang=it"
-      scrolling="auto" frameborder="0" loading="lazy"
-      title="Risultati Live"></iframe>
+    <!-- Link diretto a ScoreMer — funziona ovunque, anche su GitHub Pages -->
+    <div class="live-open-wrap">
+      <div class="live-open-icon">🔴</div>
+      <div class="live-open-title">Risultati Live</div>
+      <div class="live-open-sub">Clicca per aprire i risultati in diretta su Flashscore.it</div>
+      <a class="live-open-btn"
+         href="https://www.flashscore.it"
+         target="_blank" rel="noopener">
+        ⚽ Risultati Live · Flashscore ↗
+      </a>
+      <div class="live-leagues">
+        <span>🇮🇹 Serie A</span>
+        <span>🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier</span>
+        <span>🇩🇪 Bundesliga</span>
+        <span>🇪🇸 La Liga</span>
+        <span>🇫🇷 Ligue 1</span>
+        <span>🏆 Champions</span>
+        <span>🟠 Europa</span>
+        <span>🟢 Conference</span>
+      </div>
+    </div>
   </div>
+</div>
 </div>
 
 <!-- ═══ TAB RISULTATI ═══ -->
@@ -3140,8 +3227,8 @@ function switchTab(t){
     const el=$('liveUpdateTime');
     if(el)el.textContent='Live · '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     startLiveGoalPolling();
-    // Tenta di installare MutationObserver sull iframe
     setTimeout(installIframeObserver, 1500);
+    checkIframeLoaded();
   }
 }
 function reloadLiveWidget(){
