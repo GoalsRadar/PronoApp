@@ -967,6 +967,209 @@ main{
   .upd-next{display:none;}
 }
 
+/* ═══ RISULTATI ESATTI HEADER ═══ */
+.exact-header{
+  background:linear-gradient(135deg,rgba(0,240,192,.07),rgba(79,127,255,.05));
+  border:1px solid rgba(0,240,192,.2);
+  border-radius:14px;padding:14px 18px;
+  margin-bottom:14px;
+  position:relative;overflow:hidden;
+}
+.exact-header::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+.exact-header-label{
+  display:flex;align-items:center;gap:8px;margin-bottom:12px;
+}
+.exact-icon{font-size:16px;}
+.exact-title{
+  font-family:var(--font-head);font-size:13px;letter-spacing:.1em;
+  color:var(--accent);
+}
+.exact-picks{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+}
+@media(max-width:600px){.exact-picks{grid-template-columns:1fr;}}
+.exact-pick{
+  background:rgba(0,0,0,.2);border:1px solid rgba(0,240,192,.12);
+  border-radius:10px;padding:11px 13px;
+}
+.exact-pick-match{
+  font-family:var(--font-head);font-size:13px;letter-spacing:.03em;
+  color:var(--text);margin-bottom:5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.exact-pick-score{
+  font-family:var(--font-head);font-size:26px;letter-spacing:.06em;
+  background:linear-gradient(135deg,#fff 0%,var(--accent) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  filter:drop-shadow(0 2px 6px rgba(0,240,192,.3));
+  line-height:1;margin-bottom:5px;
+}
+.exact-pick-footer{
+  display:flex;align-items:center;justify-content:space-between;
+}
+.exact-pick-conf{
+  font-family:var(--font-mono);font-size:9px;
+  color:var(--accent);opacity:.8;
+}
+.exact-pick-quota{
+  font-family:var(--font-mono);font-size:10px;
+  color:var(--amber);font-weight:700;
+}
+
+/* ═══ LIKE BUTTON ═══ */
+.like-wrap{
+  display:flex;align-items:center;gap:7px;cursor:pointer;
+  background:rgba(255,77,109,.08);
+  border:1px solid rgba(255,77,109,.2);
+  border-radius:20px;padding:5px 12px 5px 9px;
+  transition:all .2s;user-select:none;
+  flex-shrink:0;
+}
+.like-wrap:hover{background:rgba(255,77,109,.16);border-color:rgba(255,77,109,.4);}
+.like-wrap:active{transform:scale(.94);}
+.like-wrap.liked{
+  background:rgba(255,77,109,.18);
+  border-color:rgba(255,77,109,.5);
+}
+.like-heart{
+  font-size:16px;
+  transition:transform .2s cubic-bezier(.2,.8,.2,1);
+  display:inline-block;
+}
+.like-wrap.liked .like-heart{
+  animation:heartPop .3s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes heartPop{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.5);}
+  100%{transform:scale(1);}
+}
+.like-count{
+  font-family:var(--font-mono);font-size:12px;font-weight:700;
+  color:var(--accent3);min-width:20px;text-align:center;
+}
+
+/* ═══ BANNER MULTIPLA DEL GIORNO ═══ */
+.multipla-banner{
+  background:linear-gradient(135deg,rgba(168,85,247,.1) 0%,rgba(79,127,255,.08) 50%,rgba(0,240,192,.06) 100%);
+  border:1px solid rgba(168,85,247,.3);
+  border-radius:16px;
+  padding:0;
+  margin-bottom:18px;
+  overflow:hidden;
+  position:relative;
+}
+.multipla-banner::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--purple),var(--accent2),var(--accent));
+}
+.multipla-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px 14px;
+  border-bottom:1px solid rgba(168,85,247,.15);
+}
+.multipla-header-left{display:flex;align-items:center;gap:12px;}
+.multipla-icon{
+  font-size:28px;
+  filter:drop-shadow(0 0 10px rgba(168,85,247,.6));
+  animation:multiplaGlow 2.5s ease-in-out infinite alternate;
+}
+@keyframes multiplaGlow{
+  from{filter:drop-shadow(0 0 6px rgba(168,85,247,.4));}
+  to{filter:drop-shadow(0 0 18px rgba(168,85,247,.9));}
+}
+.multipla-title{
+  font-family:var(--font-head);font-size:18px;letter-spacing:.1em;
+  color:var(--text);
+}
+.multipla-sub{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:2px;}
+.multipla-header-right{text-align:right;}
+.multipla-quota-total{
+  font-family:var(--font-head);font-size:36px;letter-spacing:.06em;
+  background:linear-gradient(135deg,#ffd700,#ff8c00);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 2px 8px rgba(255,184,0,.35));
+  line-height:1;
+}
+.multipla-quota-label{font-family:var(--font-mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;}
+
+/* Pick singolo */
+.multipla-picks{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:0;
+}
+@media(max-width:600px){.multipla-picks{grid-template-columns:1fr;}}
+.multipla-pick{
+  padding:13px 18px;
+  border-right:1px solid rgba(168,85,247,.1);
+  border-bottom:1px solid rgba(168,85,247,.1);
+  position:relative;
+  transition:background .2s;
+}
+.multipla-pick:hover{background:rgba(168,85,247,.06);}
+.multipla-pick:nth-child(2n){border-right:none;}
+.multipla-pick:nth-child(3),.multipla-pick:nth-child(4){border-bottom:none;}
+.pick-num{
+  position:absolute;top:10px;left:14px;
+  font-family:var(--font-mono);font-size:9px;color:rgba(168,85,247,.5);
+  font-weight:700;
+}
+.pick-match{
+  font-family:var(--font-head);font-size:15px;letter-spacing:.04em;
+  color:var(--text);margin-bottom:3px;padding-left:14px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.pick-bet{
+  font-family:var(--font-mono);font-size:11px;
+  color:var(--accent);margin-bottom:6px;padding-left:14px;
+}
+.pick-bottom{
+  display:flex;align-items:center;gap:8px;padding-left:14px;
+}
+.pick-quota{
+  font-family:var(--font-head);font-size:14px;letter-spacing:.04em;
+  color:var(--amber);
+}
+.pick-stars{
+  display:flex;gap:2px;
+}
+.pick-star{font-size:9px;}
+.pick-star.on{color:#ffd700;}
+.pick-star.off{color:rgba(255,255,255,.15);}
+.pick-conf-badge{
+  font-family:var(--font-mono);font-size:9px;
+  padding:2px 7px;border-radius:4px;margin-left:auto;
+}
+.pick-conf-high{background:rgba(0,240,192,.12);color:var(--accent);border:1px solid rgba(0,240,192,.25);}
+.pick-conf-mid{background:rgba(255,184,48,.1);color:var(--amber);border:1px solid rgba(255,184,48,.2);}
+
+/* Footer */
+.multipla-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 20px;
+  background:rgba(0,0,0,.15);
+  gap:12px;
+}
+.multipla-conf-bar-wrap{
+  flex:1;height:4px;background:rgba(255,255,255,.06);
+  border-radius:2px;overflow:hidden;
+}
+.multipla-conf-bar{
+  height:100%;border-radius:2px;
+  background:linear-gradient(90deg,var(--purple),var(--accent2),var(--accent));
+  transition:width 1s cubic-bezier(.2,.8,.2,1);
+}
+.multipla-footer-right{
+  display:flex;align-items:center;gap:6px;flex-shrink:0;
+}
+.multipla-conf-label{font-family:var(--font-mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
+.multipla-conf-val{font-family:var(--font-head);font-size:16px;color:var(--accent);}
+
 /* ═══ LIVE OPEN WRAP ═══ */
 .live-open-wrap{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -1236,6 +1439,10 @@ main{
     </div>
   </div>
   <div class="topbar-right">
+    <div class="like-wrap" id="likeWrap" onclick="handleLike()">
+      <span class="like-heart" id="likeHeart">👍</span>
+      <span class="like-count" id="likeCount">0</span>
+    </div>
     <div class="live-pill" onclick="switchTab('live')">
       <div class="live-dot"></div>LIVE
     </div>
@@ -1264,26 +1471,44 @@ main{
 
 <!-- ═══ TAB PRONOSTICI ═══ -->
 <div class="tab-content active" id="tab-oggi">
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-val" id="cntOggi">—</div>
-      <div class="stat-name">Partite oggi</div>
+
+
+
+
+  <!-- ═══ HEADER RISULTATI ESATTI ═══ -->
+  <div class="exact-header" id="exactHeader">
+    <div class="exact-header-label">
+      <span class="exact-icon">🎯</span>
+      <span class="exact-title">RISULTATI ESATTI PIÙ PROBABILI</span>
     </div>
-    <div class="stat-card">
-      <div class="stat-val" style="color:var(--accent2)" id="cntFonti">63</div>
-      <div class="stat-name">Fonti analizzate</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-val" style="color:var(--amber)" id="cntAcc">—</div>
-      <div class="stat-name">Conf. media</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-val" style="color:var(--accent3)" id="cntAltaFiducia">—</div>
-      <div class="stat-name">Alta fiducia</div>
+    <div class="exact-picks" id="exactPicks">
+      <!-- Popolato da renderExactResults() -->
     </div>
   </div>
 
+  <!-- ═══ BANNER MULTIPLA DEL GIORNO ═══ -->
+  <div class="multipla-banner" id="multiplaBanner" style="display:none">
+    <div class="multipla-header">
+      <div class="multipla-header-left">
+        <div class="multipla-icon">🎯</div>
+        <div>
+          <div class="multipla-title">MULTIPLA DEL GIORNO</div>
+          <div class="multipla-sub">Le 4 migliori giocate selezionate dalle fonti</div>
+        </div>
+      </div>
 
+    </div>
+    <div class="multipla-picks" id="multiplaPicks"></div>
+    <div class="multipla-footer">
+      <div class="multipla-conf-bar-wrap">
+        <div class="multipla-conf-bar" id="multiplaConfBar"></div>
+      </div>
+      <div class="multipla-footer-right">
+        <span class="multipla-conf-label">Fiducia media:</span>
+        <span class="multipla-conf-val" id="multiplaConf">—</span>
+      </div>
+    </div>
+  </div>
 
   <div class="hero-search">
     <div class="search-wrap">
@@ -1828,61 +2053,92 @@ function saveDailyStore(data){
 // Fonti: Sky Sport, calciomagazine.net, pronosticisportivi.it,
 //        blablive.com, 1x2-calcio.com, SofaScore, FBref, Bet365, SNAI
 const DEFAULT_PRONOSTICI = [
-  {id:1,comp:'UCL',compLabel:'Champions League',slot:'18:45',
-    home:'Barcellona',away:'Newcastle',
-    prob1:62,probX:22,prob2:16,
-    prono:'1 — 2-0',quota:'1.65',conf:78,
-    xg_home:2.1,xg_away:0.8,btts:35,over25:68,
-    tags:['Barca favorito','Camp Nou fortress','Yamal letale'],tagTypes:['tag-green','tag-amber','tag-green'],
-    info:'Barca primo Liga 70pt, 14W su 14 in casa. Newcastle mai vinto vs Barca in 5 precedenti.',
-    analysis:'Il Barcellona di Flick ha una forma eccellente. Newcastle solido (7 gol subiti UCL) ma deve aprirsi. Yamal e Raphinha devastanti sulle fasce. Assenti Christensen e Balde.',
+  {
+    id:1, comp:'UCL', compLabel:'Champions League', slot:'18:45',
+    home:'Barcellona', away:'Newcastle',
+    prob1:62, probX:22, prob2:16,
+    prono:'1 — Barcellona vince', conf:78,
+    risultato_esatto:'2-0',
+    xg_home:2.1, xg_away:0.8, btts:35, over25:68,
+    tags:['TOP PICK','Barca imbattuto casa','Newcastle mai vinto vs Barca'],
+    tagTypes:['tag-purple','tag-green','tag-amber'],
+    info:'Barca 1° Liga 70pt, 14W/14 in casa. Newcastle pareggio 1-1 andata, mai vinto in 5 precedenti.',
+    analysis:'Barcellona di Flick in forma eccellente al Camp Nou. Assenti Christensen e Balde ma Yamal e Raphinha devastanti. Newcastle deve segnare ma si esporrebbe. 10 fonti concordi.',
     scommessa:'Barcellona vince',
-    risultato_esatto:'2-0 o 3-1',
-    investimento:'Alta confidenza — 10 fonti concordi',
-    sources:[{n:'Sky Sport',r:'1',a:'agree'},{n:'calciomagazine',r:'1',a:'agree'},{n:'1x2-calcio.com',r:'1',a:'agree'},{n:'Bet365',r:'1 q1.65',a:'agree'},{n:'SNAI',r:'1 q1.62',a:'agree'},{n:'Betfair',r:'1 q1.67',a:'agree'},{n:'FBref',r:'xG Barca 2.1',a:'agree'},{n:'Forebet',r:'1 (68%)',a:'agree'},{n:'FootyStats',r:'1 (71%)',a:'agree'},{n:'SofaScore',r:'Barca dominante',a:'agree'}]},
-  {id:2,comp:'UCL',compLabel:'Champions League',slot:'21:00',
-    home:'Bayern Munich',away:'Atalanta',
-    prob1:58,probX:24,prob2:18,
-    prono:'GG — 2-1',quota:'1.70',conf:74,
-    xg_home:2.4,xg_away:1.3,btts:74,over25:82,
-    tags:['TOP PICK','GG blablive','Bayern 4+ gol/gara casa'],tagTypes:['tag-purple','tag-green','tag-amber'],
-    info:'Bayern in casa: media oltre 4 gol ultime 4 gare. Atalanta segna sempre, Scamacca pericoloso.',
-    analysis:'TOP PICK della giornata secondo blablive.com. Bayern devastante in casa. Atalanta di Gasperini segna sempre ma la difesa e esposta. GG altamente probabile. Forebet 74% GG, FootyStats 82% Over 2.5.',
-    scommessa:'GG (Goal Goal) @ 1.70',
-    risultato_esatto:'2-1 o 3-1',
-    investimento:'TOP PICK — massima confidenza',
-    sources:[{n:'blablive.com',r:'GG TOP PICK',a:'agree'},{n:'Forebet',r:'GG 74%',a:'agree'},{n:'FootyStats',r:'Over 2.5 82%',a:'agree'},{n:'Bet365',r:'GG q1.70',a:'agree'},{n:'SNAI',r:'GG q1.68',a:'agree'},{n:'Betfair',r:'GG q1.73',a:'agree'},{n:'Sky Sport',r:'GG',a:'agree'},{n:'SofaScore',r:'Bayern xG 2.4',a:'agree'},{n:'FBref',r:'Atalanta GCA alto',a:'agree'},{n:'calciomagazine',r:'over 2.5',a:'agree'}]},
-  {id:3,comp:'UCL',compLabel:'Champions League',slot:'21:00',
-    home:'Liverpool',away:'Galatasaray',
-    prob1:55,probX:26,prob2:19,
-    prono:'1 — 2-1',quota:'1.80',conf:70,
-    xg_home:1.9,xg_away:1.1,btts:60,over25:72,
-    tags:['Liverpool rimonta','Anfield di notte','Gala 5W consecutive'],tagTypes:['tag-green','tag-amber','tag-red'],
-    info:'Liverpool deve ribaltare 0-1. Anfield la notte e una macchina da guerra. Gala arriva con 5W.',
-    analysis:'Liverpool deve segnare senza prendere gol. Slot imposta attacco totale. Il rischio: Galatasaray in contropiede. Quote Liverpool 1 a 1.80 offrono valore reale. Notti europee ad Anfield storicamente trasformano la squadra.',
-    scommessa:'Liverpool vince @ 1.80',
-    risultato_esatto:'2-1 o 3-1',
+    investimento:'Alta confidenza — fonte convergente',
+    sources:[
+      {n:'Sky Sport',r:'1',a:'agree'},{n:'blablive.com',r:'1',a:'agree'},
+      {n:'1x2-calcio.com',r:'1',a:'agree'},{n:'pronosticisportivi.it',r:'1',a:'agree'},
+      {n:'Forebet',r:'1 (68%)',a:'agree'},{n:'Bet365',r:'1',a:'agree'},
+      {n:'SNAI',r:'1',a:'agree'},{n:'Betfair',r:'1',a:'agree'},
+      {n:'SofaScore',r:'xG Barca 2.1',a:'agree'},{n:'FootyStats',r:'1 (71%)',a:'agree'}
+    ]
+  },
+  {
+    id:2, comp:'UCL', compLabel:'Champions League', slot:'21:00',
+    home:'Bayern Munich', away:'Atalanta',
+    prob1:56, probX:24, prob2:20,
+    prono:'GG — Entrambe segnano', conf:74,
+    risultato_esatto:'2-1',
+    xg_home:2.4, xg_away:1.3, btts:74, over25:82,
+    tags:['TOP PICK','Bayern 4+ gol/gara casa','Atalanta segna sempre','blablive top'],
+    tagTypes:['tag-purple','tag-green','tag-green','tag-amber'],
+    info:'Bayern in casa: media 4+ gol ultime 4 gare. Atalanta di Gasperini segna sempre. Forebet 74% GG.',
+    analysis:'Partita da gol. Bayern devastante tra le mura amiche. Atalanta con Scamacca pericoloso ma difesa esposta alla velocita bavarese. GG la giocata con piu valore secondo tutte le fonti.',
+    scommessa:'GG (entrambe segnano)',
+    investimento:'Top pick giornata — massima confidenza',
+    sources:[
+      {n:'blablive.com',r:'GG TOP',a:'agree'},{n:'Forebet',r:'GG 74%',a:'agree'},
+      {n:'FootyStats',r:'Over 2.5 82%',a:'agree'},{n:'Sky Sport',r:'GG',a:'agree'},
+      {n:'pronosticisportivi.it',r:'over 2.5',a:'agree'},{n:'Bet365',r:'GG',a:'agree'},
+      {n:'SNAI',r:'GG',a:'agree'},{n:'Betfair',r:'GG',a:'agree'},
+      {n:'SofaScore',r:'xG Bayern 2.4',a:'agree'},{n:'FBref',r:'Atalanta GCA alto',a:'agree'}
+    ]
+  },
+  {
+    id:3, comp:'UCL', compLabel:'Champions League', slot:'21:00',
+    home:'Liverpool', away:'Galatasaray',
+    prob1:55, probX:26, prob2:19,
+    prono:'1 — Liverpool vince', conf:70,
+    risultato_esatto:'2-1',
+    xg_home:1.9, xg_away:1.1, btts:60, over25:72,
+    tags:['Liverpool rimonta','Anfield di notte','GG possibile'],
+    tagTypes:['tag-green','tag-amber','tag-blue'],
+    info:'Liverpool deve ribaltare 0-1 andata. Gala 5W consecutive. Ad Anfield i Reds sono trasformati.',
+    analysis:'Liverpool con il muro di Anfield deve segnare senza prendere gol. Slot lancia attacco totale. Galatasaray pericoloso in contropiede come dimostrato allrandata. Giocata piu coperta: Liverpool vince o GG.',
+    scommessa:'Liverpool vince',
     investimento:'Buon valore — da considerare',
-    sources:[{n:'Sky Sport',r:'1',a:'agree'},{n:'calciomagazine',r:'1',a:'agree'},{n:'1x2-calcio.com',r:'1',a:'agree'},{n:'Bet365',r:'1 q1.80',a:'agree'},{n:'SNAI',r:'1 q1.78',a:'agree'},{n:'Betfair',r:'1 q1.82',a:'agree'},{n:'SofaScore',r:'LIV xG 1.9',a:'agree'},{n:'Forebet',r:'1 (61%)',a:'partial'},{n:'FootyStats',r:'Over 2.5 72%',a:'partial'},{n:'blablive',r:'GG',a:'partial'}]},
-  {id:4,comp:'UCL',compLabel:'Champions League',slot:'21:00',
-    home:'Tottenham',away:'Atletico Madrid',
-    prob1:28,probX:24,prob2:48,
-    prono:'GG — 1-3',quota:'1.72',conf:65,
-    xg_home:1.4,xg_away:1.8,btts:71,over25:75,
-    tags:['Atletico passa','GG top pick blab','Rimonta quasi impossibile'],tagTypes:['tag-red','tag-green','tag-gray'],
-    info:'Atletico avanti 5-2 andata. Spurs devono segnare 4 gol apertura spazi per Atletico.',
-    analysis:'Il 5-2 dell andata condanna il Tottenham. Simeone puo gestire ma Spurs devono attaccare aprendo spazi per i colchoneros. GG e la scommessa piu solida. blablive.com top pick GG. FootyStats 75% over 2.5.',
-    scommessa:'GG (Goal Goal) @ 1.72',
-    risultato_esatto:'2-3 o 1-2',
+    sources:[
+      {n:'Sky Sport',r:'1',a:'agree'},{n:'pronosticisportivi.it',r:'GG+1',a:'partial'},
+      {n:'1x2-calcio.com',r:'1',a:'agree'},{n:'Forebet',r:'1 (61%)',a:'partial'},
+      {n:'Bet365',r:'1',a:'agree'},{n:'SNAI',r:'1',a:'agree'},
+      {n:'SofaScore',r:'xG LIV 1.9',a:'agree'},{n:'FootyStats',r:'over 2.5 72%',a:'partial'},
+      {n:'blablive',r:'GG',a:'partial'},{n:'calciomagazine',r:'1',a:'agree'}
+    ]
+  },
+  {
+    id:4, comp:'UCL', compLabel:'Champions League', slot:'21:00',
+    home:'Tottenham', away:'Atletico Madrid',
+    prob1:28, probX:24, prob2:48,
+    prono:'GG — Entrambe segnano', conf:65,
+    risultato_esatto:'2-3',
+    xg_home:1.4, xg_away:1.8, btts:71, over25:75,
+    tags:['Atletico passa','GG blablive top','Spurs devono segnare 4'],
+    tagTypes:['tag-red','tag-green','tag-gray'],
+    info:'Atletico avanti 5-2 andata. Gli Spurs devono segnare molto aprendo spazi ai Colchoneros.',
+    analysis:'Rimonta quasi impossibile per il Tottenham. Simeone gestisce ma gli Spurs ataccare aprendo transizioni pericolose per Atletico. GG e la scelta piu solida: blablive top pick, FootyStats 75% over 2.5.',
+    scommessa:'GG (entrambe segnano)',
     investimento:'Valore — combinabile con Bayern GG',
-    sources:[{n:'blablive.com',r:'GG TOP',a:'agree'},{n:'pronosticisportivi.it',r:'GG',a:'agree'},{n:'calciomagazine',r:'2',a:'agree'},{n:'Bet365',r:'GG q1.72',a:'agree'},{n:'SNAI',r:'GG q1.70',a:'agree'},{n:'Betfair',r:'2 q2.20',a:'agree'},{n:'Sky Sport',r:'Atletico passa',a:'agree'},{n:'Forebet',r:'2+GG',a:'agree'},{n:'FootyStats',r:'Over 2.5 75%',a:'agree'},{n:'SofaScore',r:'Atl xG 1.8',a:'agree'}]}
+    sources:[
+      {n:'blablive.com',r:'GG TOP',a:'agree'},{n:'pronosticisportivi.it',r:'GG',a:'agree'},
+      {n:'FootyStats',r:'Over 2.5 75%',a:'agree'},{n:'Sky Sport',r:'Atletico passa',a:'agree'},
+      {n:'Forebet',r:'2+GG',a:'agree'},{n:'Bet365',r:'GG',a:'agree'},
+      {n:'SNAI',r:'GG',a:'agree'},{n:'Betfair',r:'2',a:'agree'},
+      {n:'SofaScore',r:'Atl xG 1.8',a:'agree'},{n:'calciomagazine',r:'2',a:'agree'}
+    ]
+  }
 ];
 
-
-// ══════════════════════════════════════════════════════
-// CAMPIONATI CONFIG
-// Struttura completa con tutti i campionati forniti
-// ══════════════════════════════════════════════════════
 const CAMPIONATI_CONFIG = [
   {id:'UCL', label:'Champions League', flag:'🏆', color:'#ffd700', borderColor:'rgba(255,215,0,.3)', giornata:'Ottavi di finale'},
   {id:'UEL', label:'Europa League',    flag:'🟠', color:'#ff8c42', borderColor:'rgba(255,140,66,.3)', giornata:'Ottavi di finale'},
@@ -1911,31 +2167,35 @@ const LEAGUE_LOGOS = {
 
 const DEFAULT_ANALISI = {
   date:'18/03/2026',
-  summary:'Champions League ottavi di ritorno. 4 partite analizzate da 63 fonti. TOP PICK del giorno: Bayern-Atalanta GG a 1.70 (Forebet 74%, FootyStats 82%). Barcellona favorito netto a 1.65 con convergenza totale da tutte le fonti. Migliore combinazione: Bayern GG + Barcellona 1 = multipla @ 2.81.',
+  summary:'UCL ottavi ritorno — 4 partite analizzate da 63 fonti. TOP PICK: Bayern-Atalanta GG (Forebet 74%, FootyStats 82%). Barcellona 10 fonti concordi per la vittoria. Multipla consigliata: Barcellona vince + Bayern GG.',
   domande:{
-    partite:'Barcellona-Newcastle 18:45, Bayern-Atalanta 21:00, Liverpool-Galatasaray 21:00, Tottenham-Atletico 21:00',
-    pronostici_migliori:'1. Bayern-Atalanta GG (74% Forebet) 2. Barcellona vince (78% conf) 3. Tottenham-Atletico GG (71%)',
-    risultati_esatti:'Barca 2-0, Bayern 2-1, Liverpool 2-1, Atletico passa 1-2',
-    chi_vince:'Barcellona (62%), Bayern (58%), Liverpool (55%), Atletico (48%)',
-    dove_investire:'Bayern GG @ 1.70 — massimo valore. Multipla Barca+Bayern GG @ 2.81',
-    scommesse_migliori:'1. Bayern-Atalanta GG 1.70 2. Barcellona-Newcastle 1 1.65 3. Multipla: Barca1+BayernGG 2.81'
+    partite:'Barcellona-Newcastle 18:45 | Bayern-Atalanta, Liverpool-Galatasaray, Tottenham-Atletico 21:00',
+    pronostici_migliori:'1. Bayern-Atalanta GG (74% Forebet) 2. Barcellona vince (78%) 3. Tottenham-Atletico GG (71%)',
+    risultati_esatti:'Barcellona 2-0 Newcastle | Bayern 2-1 Atalanta | Liverpool 2-1 Galatasaray | Tottenham 2-3 Atletico',
+    chi_vince:'Barcellona (62%) e Bayern (56%) i piu probabili. Liverpool (55%) con Anfield. Atletico passa (48%)',
+    dove_investire:'Bayern GG massimo valore. Barcellona vince sicuro. Multipla Barca+Bayern GG.',
+    scommesse_migliori:'1. Bayern-Atalanta GG 2. Barcellona vince 3. Tottenham-Atletico GG'
   },
-  topPick:{match:'Bayern Munich vs Atalanta',bet:'Goal Goal (GG)',quota:'1.70',conf:74,reason:'Bayern devastante in casa (4+ gol media ultimi 4), Atalanta sempre in gol. Forebet 74% GG, FootyStats 82% over 2.5. blablive.com top pick.'},
-  value:{match:'Barcellona vs Newcastle',bet:'Barcellona vince',quota:'1.65',conf:78,reason:'10 fonti concordi. Barca primo Liga 70pt, imbattuto in casa (14/14). Newcastle mai vinto vs Barca in 5 precedenti.'},
-  safe:{match:'Tottenham vs Atletico Madrid',bet:'GG (entrambe segnano)',quota:'1.72',conf:65,reason:'Spurs devono segnare 4 gol aprendo spazi. Atletico colpisce in contropiede. blablive TOP PICK. FootyStats 75% over 2.5.'},
-  multipla:{picks:'Barcellona 1 + Bayern GG',quota:'2.81',conf:58,note:'Combinazione raccomandata dal motore AI'},
+  topPick:{match:'Bayern Munich vs Atalanta',bet:'Goal Goal (GG)',conf:74,
+    reason:'Bayern 4+ gol/gara in casa ultime 4. Atalanta segna sempre. Forebet 74% GG, FootyStats 82% over 2.5. blablive.com top pick.'},
+  value:{match:'Barcellona vs Newcastle',bet:'Barcellona vince',conf:78,
+    reason:'10 fonti concordi. Barca 1° Liga 70pt, imbattuto in casa 14/14. Newcastle mai vinto vs Barca in 5 precedenti.'},
+  safe:{match:'Tottenham vs Atletico Madrid',bet:'GG (entrambe segnano)',conf:65,
+    reason:'Spurs devono segnare 4 gol aprendo spazi. Atletico colpisce in contropiede. blablive TOP PICK. FootyStats 75% over 2.5.'},
+  multipla:{picks:'Barcellona vince + Bayern GG',conf:58,note:'Combinazione raccomandata dalle fonti'},
 };
 
+
 const DEFAULT_TICKER = [
-  '🏆 UCL ottavi ritorno OGGI: Barcellona-Newcastle 18:45 | Bayern-Atalanta · Liverpool-Gala · Tottenham-Atletico alle 21:00',
-  '⚽ TOP PICK: Bayern-Atalanta GG @ 1.70 — Forebet 74% + FootyStats 82% over 2.5 — blablive.com raccomandato',
-  '📊 Barcellona Camp Nou: 14 vittorie su 14 partite in casa in Liga — Newcastle mai vinto vs Barca in 5 precedenti',
-  '🔴 Liverpool vs Galatasaray: rimonta difficile (0-1 andata) ma Anfield di notte e un fortino europeo',
-  '💡 Tottenham-Atletico: colchoneros avanti 5-2 — rimonta quasi impossibile — GG migliore scommessa',
-  '📈 xG attesi: Bayern 2.4 · Barca 2.1 · Liverpool 1.9 · Atletico 1.8 — alta probabilita di gol',
-  '💰 Quote aggiornate: Barca 1 @ 1.65 · Bayern GG @ 1.70 · Liverpool 1 @ 1.80 · Atletico GG @ 1.72',
-  '🎯 Multipla AI: Barcellona 1 + Bayern Munich GG = quota combinata 2.81 — 58% confidenza',
+  '🏆 UCL ottavi ritorno 18 mar — Barcellona-Newcastle 18:45 | Bayern-Atalanta · Liverpool-Gala · Tottenham-Atletico alle 21:00',
+  '⚽ TOP PICK del giorno: Bayern-Atalanta GG — Forebet 74% + FootyStats 82% over 2.5 — blablive.com RACCOMANDATO',
+  '📊 Barcellona Camp Nou: 14 vittorie su 14 in Liga — Newcastle pareggio 1-1 andata, mai vinto vs Barca in 5 precedenti',
+  '🔴 Liverpool vs Galatasaray: Reds devono ribaltare 0-1 — Anfield di notte trasforma i Reds in fortino europeo',
+  '💡 Tottenham-Atletico: colchoneros avanti 5-2 andata — rimonta quasi impossibile per gli Spurs — GG la miglior giocata',
+  '🎯 Migliori giocate: Barcellona 1 + Bayern GG — Tottenham-Atletico GG — Liverpool vince ad Anfield',
+  '📈 xG Bayern in casa: 2.4 attesi — media 4+ gol nelle ultime 4 gare interne — Atalanta segna in ogni partita',
 ];
+
 
 
 // ============================================================
@@ -2025,7 +2285,7 @@ function buildCard(m){
         }
         return '<div class="teams-row">'
           +mk3d(m.home,'home')
-          +'<div class="score-box"><div class="score-val">vs</div><div class="score-label">'+m.compLabel.split(' ')[0]+'</div></div>'
+          +'<div class="score-box"><div class="score-val" style="font-size:11px;opacity:.35;letter-spacing:.06em">vs</div><div class="score-label">'+m.compLabel.split(' ')[0]+'</div></div>'
           +mk3d(m.away,'away')
           +'</div>';
       })()
@@ -2061,6 +2321,141 @@ function buildCard(m){
 // ============================================================
 // RENDER GRID
 // ============================================================
+// ============================================================
+// LIKE BUTTON — counter illimitato, persistente
+// ============================================================
+const LIKE_KEY = 'pronoapp_likes_v1';
+
+function getLikes(){
+  try{ return parseInt(localStorage.getItem(LIKE_KEY)||'0',10); }
+  catch(e){ return 0; }
+}
+function saveLikes(n){
+  try{ localStorage.setItem(LIKE_KEY, String(n)); }
+  catch(e){}
+}
+function initLikes(){
+  const n = getLikes();
+  const el = $('likeCount');
+  if(el) el.textContent = n >= 1000 ? (n/1000).toFixed(1)+'k' : String(n);
+}
+function handleLike(){
+  const wrap  = $('likeWrap');
+  const heart = $('likeHeart');
+  const count = $('likeCount');
+  const n = getLikes() + 1;
+  saveLikes(n);
+  if(count) count.textContent = n >= 1000 ? (n/1000).toFixed(1)+'k' : String(n);
+  if(heart) heart.textContent = '👍';
+  if(wrap)  wrap.classList.add('liked');
+  // Suono micro — tick leggero
+  try{
+    const ctx = getAudioCtx();
+    if(ctx){
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sine'; o.frequency.value = 880;
+      g.gain.setValueAtTime(0.08, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.12);
+      o.start(ctx.currentTime); o.stop(ctx.currentTime+0.15);
+    }
+  }catch(e){}
+  // Torna a cuore vuoto dopo 1s (permette ri-click)
+  setTimeout(()=>{
+    if(heart) heart.textContent = '👍';
+    if(wrap)  wrap.classList.remove('liked');
+  }, 900);
+}
+
+// ============================================================
+// HEADER RISULTATI ESATTI — Top 3 partite per fiducia
+// ============================================================
+function renderExactResults(){
+  const el = $('exactPicks');
+  if(!el) return;
+  const header = $('exactHeader');
+
+  const top3 = [...MATCHES_TODAY]
+    .sort((a,b) => b.conf - a.conf)
+    .slice(0, 3);
+
+  if(!top3.length){
+    if(header) header.style.display = 'none';
+    return;
+  }
+  if(header) header.style.display = '';
+
+  el.innerHTML = top3.map(m => {
+    // Risultato esatto dal campo 'risultato_esatto' o estratto da 'prono'
+    const score = m.risultato_esatto || m.prono.split('—').slice(-1)[0].trim() || '—';
+    // Colore squadra casa
+    const cols = TEAM_COLORS[m.home];
+    const base = cols ? cols[0] : '#00d4a0';
+    function ltn(h,a){if(!h||h[0]!=='#')return '#aabbcc';let c=parseInt(h.replace('#',''),16);return 'rgb('+Math.min(255,((c>>16)&255)+a)+','+Math.min(255,((c>>8)&255)+a)+','+Math.min(255,(c&255)+a)+')';}
+    const scoreStyle = 'background:linear-gradient(135deg,'+ltn(base,110)+','+base+');-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 1px 4px '+base+'55)';
+    return '<div class="exact-pick">'
+      + '<div class="exact-pick-match" title="'+m.home+' vs '+m.away+'">'+m.home+' – '+m.away+'</div>'
+      + '<div class="exact-pick-score" style="'+scoreStyle+'">'+score+'</div>'
+      + '<div class="exact-pick-footer">'
+        + '<span class="exact-pick-conf">'+m.conf+'% fiducia</span>'
+        + '</div>'
+    + '</div>';
+  }).join('');
+}
+
+// ============================================================
+// MULTIPLA DEL GIORNO — Top 4 pick per fiducia
+// ============================================================
+function renderMultipla(){
+  const banner = $('multiplaBanner');
+  const picksEl = $('multiplaPicks');
+  const quotaEl = $('multiplaQuotaTot');
+  const confEl  = $('multiplaConf');
+  const barEl   = $('multiplaConfBar');
+  if(!banner || !picksEl) return;
+
+  // Prendi i top 4 pronostici per fiducia
+  const top4 = [...MATCHES_TODAY]
+    .sort((a,b) => b.conf - a.conf)
+    .slice(0, 4);
+
+  if(!top4.length){
+    banner.style.display = 'none';
+    return;
+  }
+  banner.style.display = '';
+
+  // Calcola quota combinata e fiducia media
+  const confMed  = Math.round(top4.reduce((acc,m) => acc + m.conf, 0) / top4.length);
+
+  if(confEl)  confEl.textContent  = confMed + '%';
+  if(barEl)   barEl.style.width   = confMed + '%';
+
+  // Stelle fiducia (1-5)
+  function stars(conf){
+    const n = Math.round(conf / 20);
+    return [1,2,3,4,5].map(i =>
+      '<span class="pick-star '+(i<=n?'on':'off')+'">★</span>'
+    ).join('');
+  }
+
+  picksEl.innerHTML = top4.map((m, i) => {
+    const confCls = m.conf >= 72 ? 'pick-conf-high' : 'pick-conf-mid';
+    const matchLabel = m.home + ' – ' + m.away;
+    const betLabel   = m.prono.split('—')[0].trim() || m.prono;
+    return '<div class="multipla-pick">'
+      + '<div class="pick-num">' + (i+1) + '</div>'
+      + '<div class="pick-match" title="'+matchLabel+'">'+matchLabel+'</div>'
+      + '<div class="pick-bet">'+betLabel+'</div>'
+      + '<div class="pick-bottom">'
+        + '<div class="pick-stars">'+stars(m.conf)+'</div>'
+        + '<span class="pick-conf-badge '+confCls+'">'+m.conf+'%</span>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+}
+
 function renderGrid(containerId, matches){
   const el=$(containerId); if(!el)return;
   let f=[...matches];
@@ -2078,17 +2473,18 @@ function renderGrid(containerId, matches){
   }
   el.innerHTML=f.map(buildCard).join('');
   updateFilterBar(matches);
+  // Aggiorna sempre la multipla e i risultati esatti
+  renderMultipla();
+  renderExactResults();
   // Adatta i font dopo il rendering (requestAnimationFrame aspetta il layout)
   requestAnimationFrame(fitTeamNames);
   const cnt=document.querySelector('#pronoTitle');
   const now=new Date();
   const dl=now.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
   if(cnt)cnt.innerHTML='Pronostici del giorno <span class="section-count">'+f.length+' partite · '+dl+'</span>';
-  if($('cntOggi'))$('cntOggi').textContent=f.length;
   if($('cntAltaFiducia'))$('cntAltaFiducia').textContent=f.filter(m=>m.conf>=72).length;
   const avgConf=Math.round(f.reduce((a,m)=>a+m.conf,0)/f.length);
-  if($('cntAcc'))$('cntAcc').textContent=avgConf+'%';
-}
+  }
 
 
 
@@ -2847,6 +3243,15 @@ function scheduleMidnightUpdate(){
     toast('✅','Pronostici del nuovo giorno caricati!',5000);
     // Calcola risultati del giorno precedente
     if(window._midnightHook) window._midnightHook();
+    // Aggiorna header risultati esatti e multipla con nuovi dati
+    setTimeout(()=>{
+      renderExactResults();
+      renderMultipla();
+      // Aggiorna titolo sezione con la nuova data
+      const secTitle=document.querySelector('#pronoTitle');
+      const newDate=new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
+      if(secTitle)secTitle.innerHTML='Pronostici del giorno <span class="section-count">'+MATCHES_TODAY.length+' partite · '+newDate+'</span>';
+    }, 2000);
     // Schedule next
     setTimeout(midnight, msToNextMidnight());
   }, ms);
